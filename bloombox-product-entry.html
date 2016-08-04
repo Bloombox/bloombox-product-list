@@ -1,0 +1,95 @@
+
+<!--
+`<bloombox-product-entry>` provides UI for an individual generic product item in a
+`<bloombox-product-list>`.
+
+@group Bloombox Elements
+@element bloombox-product-entry
+@demo demo/index.html
+@homepage bloombox.github.io
+-->
+
+<link rel="import" href="../polymer/polymer.html">
+
+<link rel="import" href="../iron-icon/iron-icon.html">
+<link rel="import" href="../iron-icons/iron-icons.html">
+
+<link rel="import" href="../paper-item/paper-item.html">
+<link rel="import" href="../paper-checkbox/paper-checkbox.html">
+
+<link rel="import" href="../bloombox-styles/bloombox-styles.html">
+
+
+<dom-module id="bloombox-product-entry">
+  <template>
+    <style is="custom-style" include="bloombox-styles">
+      :host {
+        height: 50px;
+        background: white;
+      }
+
+      :host paper-item {
+        height: 50px;
+        pointer-events: none;
+      }
+
+      :host paper-item .entry-data {
+        cursor: default;
+      }
+    </style>
+
+    <paper-item>
+      <div id="entryContainer" class="product-entry-container">
+        <iron-icon icon="warning"></iron-icon>
+        <paper-item-body>
+          <paper-checkbox hidden$="{{!multiselect}}" checked="{{selected}}"></paper-checkbox>
+          <b class="entry-data">{{product.name}}</b>
+        </paper-item-body>
+      </div><!-- end div.product-entry-container -->
+    </paper-item>
+  </template>
+  
+  <script>
+    Polymer.BloomboxProductEntry = Polymer({
+      is: 'bloombox-product-entry',
+
+      properties: {
+        /**
+         * Key for the current product object.
+         */
+        key: {
+          type: String,
+          notify: true,
+          reflectToAttribute: true
+        },
+
+        /**
+         * Data value for the current product object.
+         */
+        product: {
+          type: Object,
+          notify: true
+        },
+
+        /**
+         * Whether the current item is selected or not.
+         */
+        selected: {
+          type: Boolean,
+          notify: true,
+          value: false,
+          reflectToAttribute: true
+        },
+
+        /**
+         * Activate or deactivate multiselection UI.
+         */
+        multiselect: {
+          type: Boolean,
+          notify: true,
+          reflectToAttribute: true
+        }
+      }
+    });
+  </script>
+</dom-module>

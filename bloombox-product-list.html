@@ -1,0 +1,212 @@
+
+<!--
+`<bloombox-product-list>` provides UI for listing products and performing bulk or individual edits/deletes.
+
+@group Bloombox Elements
+@element bloombox-product-list
+@demo demo/index.html
+@homepage bloombox.github.io
+-->
+
+<link rel="import" href="../polymer/polymer.html">
+
+<link rel="import" href="../iron-list/iron-list.html">
+<link rel="import" href="../paper-item/paper-item.html">
+
+<link rel="import" href="../bloombox-styles/bloombox-styles.html">
+
+<link rel="import" href="./bloombox-product-entry.html">
+<link rel="import" href="./bloombox-product-list-tools.html">
+
+
+<dom-module id="bloombox-product-list">
+  <template>
+    <style is="custom-style" include="bloombox-styles">
+      :host {
+        display: block;
+        cursor: pointer;
+        height: var(--bloombox-product-list-height, 806px);
+      }
+
+      :host div.product-list-container {
+        display: block;
+        width: 100%;
+        overflow: auto;
+        height: calc(var(--bloombox-product-list-height, 806px) - 56px);
+      }
+
+      :host div.product-list-container bloombox-product-entry {
+        height: 50px;
+      }
+
+      :host div.product-list-container bloombox-product-entry[selected] {
+        background-color: #fefefe !important;
+      }
+      
+      :host div.product-list-container,
+      :host div.product-list-container bloombox-product-entry:nth-child(odd) {
+        background: #dedede;
+      }
+
+      :host div.product-list-container bloombox-product-entry:nth-child(even) {
+        background: #cdcdcd;
+      }
+    </style>
+
+    <bloombox-product-list-tools
+      section="{{section}}"
+      heading="{{heading}}"
+      multiselect="{{multiselect}}"
+      count-of-items="[[_totalCountOfItems]]"
+      count-of-visible-items="[[_visibleCountOfItems]]"></bloombox-product-list-tools>
+
+    <div id="listContainer" class="product-list-container">
+      <iron-list
+         id="productsList"
+         items="{{_productsArray}}"
+         as="product"
+         selection-enabled
+         multi-selection="{{multiselect}}"
+         role="listbox"
+         scroll-target="listContainer">
+        <template>
+          <bloombox-product-entry
+            key="{{product.key}}"
+            product="{{product.value}}"
+            multiselect$="{{multiselect}}"
+            selected$="{{selected}}"
+            tabindex="[[tabIndex]]"></bloombox-product-entry>
+        </template>
+      </iron-list>
+    </div><!-- end div.product-list-container -->
+  </template>
+  
+  <script>
+    Polymer.BloomboxProductList = Polymer({
+      is: 'bloombox-product-list',
+
+      properties: {
+        /**
+         * Computed final array of products we will be displaying.
+         */
+        _productsArray: {
+          type: Array,
+          notify: true,
+          computed: '_computeProductsArray(products)'
+        },
+
+        /**
+         * Computed value counting the total number of items that
+         * we could display.
+         */
+        _totalCountOfItems: {
+          type: Number,
+          notify: true,
+          computed: '_computeTotalCountOfItems(_productsArray)'
+        },
+
+        /**
+         * Computed value counting the visible number of items, out
+         * of the `total` value above.
+         */
+        _visibleCountOfItems: {
+          type: Number,
+          notify: true,
+          computed: '_computeVisibleCountOfItems(_productsArray)'
+        },
+
+        /**
+         * Section we are displaying products for.
+         */
+        section: {
+          type: String,
+          nofity: true,
+          reflectToAttribute: true
+        },
+
+        /**
+         * Human-friendly label for the section we are displaying
+         * products for.
+         */
+        heading: {
+          type: String,
+          notify: true,
+          reflectToAttribute: true
+        },
+
+        /**
+         * List of products that should be displayed in the list widget.
+         */
+        products: {
+          type: Object,
+          notify: true,
+          reflectToAttribute: false
+        },
+
+        /**
+         * Activate or deactivate multiselection UI.
+         */
+        multiselect: {
+          type: Boolean,
+          notify: true,
+          reflectToAttribute: true,
+          value: false
+        },
+
+        /**
+         * Keeps track of the height of this element. Height must be
+         * specified explicitly for scrolling to work properly.
+         */
+        height: {
+          type: String,
+          notify: true,
+          reflectToAttribute: true,
+          value: "300px"
+        }
+      },
+
+      /**
+       * Compute final array of products available to be displayed.
+       */
+      _computeProductsArray: function(products) {
+        var productsArray;
+        if (typeof products === "object") {
+          productsArray = this._toArray(products);
+          if (Array.isArray(productsArray) && productsArray.length > 0) {
+            return productsArray;
+          }
+        }
+        return [];
+      },
+
+      /**
+       * Count the total number of products that we have.
+       */
+      _computeTotalCountOfItems: function(products) {
+        if (Array.isArray(products))
+          return products.length;
+        return 0;
+      },
+
+      /**
+       * Count the number of products currently visible.
+       */
+      _computeVisibleCountOfItems: function(products) {
+        // @TODO: coming soon when filters are a thing
+        return this._computeTotalCountOfItems(products);
+      },
+
+      /**
+       * Small utility to convert an object of keys=>values into an array.
+       */
+      _toArray: function(obj) {
+        return Object.keys(obj).map(function(key) {
+          return {
+            key: key,
+            value: obj[key]
+          };
+        });
+      }
+    });
+  </script>
+</dom-module>

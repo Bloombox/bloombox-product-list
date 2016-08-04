@@ -1,0 +1,121 @@
+
+<!--
+`<bloombox-product-list-tools>` provides UI for filtering, searching,
+and easily navigating a `<bloombox-product-list>`.
+
+@group Bloombox Elements
+@element bloombox-product-list-tools
+@demo demo/index.html
+@homepage bloombox.github.io
+-->
+
+<link rel="import" href="../polymer/polymer.html">
+
+<link rel="import" href="../iron-icons/iron-icons.html">
+<link rel="import" href="../iron-iconset/iron-iconset.html">
+
+<link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../paper-toolbar/paper-toolbar.html">
+<link rel="import" href="../paper-checkbox/paper-checkbox.html">
+
+<link rel="import" href="../bloombox-styles/bloombox-styles.html">
+
+
+<dom-module id="bloombox-product-list-tools">
+  <template>
+    <style is="custom-style" include="bloombox-styles">
+      :host {
+        height: 56px;
+        display: block;
+        background: #ddd;
+      }
+
+      :host #productListToolbar {
+        --paper-toolbar-height: 56px;
+        --paper-toolbar-sm-height: 56px;
+      }
+    </style>
+
+    <div class="product-list-toolbar-container">
+      <paper-toolbar id="productListToolbar">
+        <div title>[[_titleLabel]]</div>
+      </paper-toolbar>
+    </div><!-- end .product-list-toolbar-container -->
+  </template>
+  
+  <script>
+    Polymer.BloomboxProductListTools = Polymer({
+      is: 'bloombox-product-list-tools',
+
+      properties: {
+        /**
+         * Computed property that provides an appropriate label
+         * for the toolbar depending on the number of items
+         * total and the number of items showing.
+         */
+        _titleLabel: {
+          type: String,
+          notify: true,
+          computed: '_computeTitleLabel(heading, countOfItems, countOfVisibleItems)'
+        },
+
+        /**
+         * Current section that we are displaying tools for.
+         */
+        section: {
+          type: String,
+          notify: true,
+          reflectToAttribute: true
+        },
+
+        /**
+         * Human-readable label for the section that we are
+         * displaying tools for.
+         */
+        heading: {
+          type: Boolean,
+          notify: true,
+          reflectToAttribute: true,
+          value: false
+        },
+
+        /**
+         * Activate or deactivate multiselection UI.
+         */
+        multiselect: {
+          type: Boolean,
+          notify: true,
+          reflectToAttribute: true,
+          value: false
+        },
+
+        /**
+         * Holds the current count of total items, so it may
+         * be displayed to the user when things are filtered
+         * out.
+         */
+        countOfItems: {
+          type: Number,
+          notify: true
+        },
+
+        /**
+         * Holds the current count of visible items, so it may
+         * be displayed to the user when things are filtered out.
+         */
+        countOfVisibleItems: {
+          type: Number,
+          notify: true
+        }
+      },
+
+      _computeTitleLabel: function(heading, countOfItems, countOfVisibleItems) {
+        if (countOfItems === countOfVisibleItems) {
+          return "Showing " + countOfItems + " " + heading.toLowerCase();
+        }
+        return "Showing " + countOfVisibleItems + " of " + countOfItems + " " + heading.toLowerCase();
+      }
+    });
+  </script>
+</dom-module>
