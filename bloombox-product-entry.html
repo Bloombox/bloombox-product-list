@@ -42,6 +42,8 @@
       /** -- left side -- **/
       :host paper-item iron-icon {
         margin-right: 10px;
+        width: 36px;
+        height: 36px;
       }
 
       :host paper-item .item-name {
@@ -193,7 +195,7 @@
           if (product.species === "Indica")
             return "bloombox:indica-circle";
         }
-        return "warning";
+        return "bloombox:hybrid-circle";
       },
 
       /**
@@ -232,9 +234,9 @@
           if (value.pricing.unit !== undefined) {
             return value.pricing.unit.value;
           } else {
-            // we need to find the smallest weighted size
-            // this is not yet supported
-            // @TODO(sgammon): fully support pricing
+            if (value.pricing.quartergram !== undefined) {
+
+            }
           }
         }
         return "error";

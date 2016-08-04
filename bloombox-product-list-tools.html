@@ -35,10 +35,31 @@ and easily navigating a `<bloombox-product-list>`.
         --paper-toolbar-height: 56px;
         --paper-toolbar-sm-height: 56px;
       }
+
+      :host paper-toolbar div[title] {
+        flex: 1 0 60%;
+        text-align: right;
+      }
+
+      :host paper-toolbar paper-input {
+        flex: 1 1 40%;
+
+        height: 50px;
+        margin-top: -30px;
+
+        --paper-input-container: {
+          height: 50px;
+        };
+
+        --paper-input-container-color: white;
+        --paper-input-container-focus-color: white;
+        --paper-input-container-input-color: white;
+      }
     </style>
 
     <div class="product-list-toolbar-container">
       <paper-toolbar id="productListToolbar">
+        <paper-input placeholder="Search" value="{{search}}" no-float-label></paper-input>
         <div title>[[_titleLabel]]</div>
       </paper-toolbar>
     </div><!-- end .product-list-toolbar-container -->
@@ -106,6 +127,15 @@ and easily navigating a `<bloombox-product-list>`.
          */
         countOfVisibleItems: {
           type: Number,
+          notify: true
+        },
+
+        /**
+         * Holds the current search terms, submitted by the user
+         * if they wish to filter the list.
+         */
+        search: {
+          type: String,
           notify: true
         }
       },

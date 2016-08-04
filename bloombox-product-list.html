@@ -56,6 +56,7 @@
 
     <!-- Controls -->
     <bloombox-product-list-tools
+      search="{{search}}"
       section="{{section}}"
       heading="{{heading}}"
       multiselect="{{multiselect}}"
@@ -66,7 +67,7 @@
     <div id="listContainer" class="product-list-container">
       <iron-list
          id="productsList"
-         items="{{_productsArray}}"
+         items="{{_visibleProducts}}"
          as="product"
          selection-enabled
          multi-selection="{{multiselect}}"
@@ -105,13 +106,22 @@
         },
 
         /**
+         * Computed set of visible products, after search/filtering.
+         */
+        _visibleProducts: {
+          type: Array,
+          notify: true,
+          computed: '_computeVisibleProducts(_productsArray, search)'
+        },
+
+        /**
          * Computed value counting the total number of items that
          * we could display.
          */
         _totalCountOfItems: {
           type: Number,
           notify: true,
-          computed: '_computeTotalCountOfItems(_productsArray)'
+          readOnly: true
         },
 
         /**
@@ -121,7 +131,7 @@
         _visibleCountOfItems: {
           type: Number,
           notify: true,
-          computed: '_computeVisibleCountOfItems(_productsArray)'
+          readOnly: true
         },
 
         /**
@@ -184,38 +194,102 @@
           readOnly: true,
           reflectToAttribute: false,
           computed: '_computeSelected(_selected)'
+        },
+
+        /**
+         * Holds the currently-active search submitted by the user,
+         * if any.
+         */
+        search: {
+          type: String,
+          nofity: true,
+          observer: '_observeSearch'
         }
       },
 
       /**
-       * Compute final array of products available to be displayed.
+       * Computes an array of products from the standard key=>value
+       * object format used by underlying storage.
        */
       _computeProductsArray: function(products) {
-        var productsArray;
+        var converted;
         if (typeof products === "object") {
-          productsArray = this._toArray(products);
-          if (Array.isArray(productsArray) && productsArray.length > 0) {
-            return productsArray;
-          }
+          converted = this._toArray(products);
+          this._set_totalCountOfItems(converted.length);
+          return converted;
         }
+        this._set_totalCountOfItems(0);
         return [];
       },
-
+      
       /**
-       * Count the total number of products that we have.
+       * Computes which products should be visible, given the current
+       * state of search and filters.
        */
-      _computeTotalCountOfItems: function(products) {
-        if (Array.isArray(products))
-          return products.length;
-        return 0;
+      _computeVisibleProducts: function(products, search) {
+        if (Array.isArray(products) && products.length > 0) {
+          if (search) {
+            filteredProducts = [];
+            terms = this._processTerms(search);
+
+            if (terms && Array.isArray(terms) && terms.length > 0) {
+              for (i in products) {
+                product = products[i];
+
+                // enforce search terms
+                if (this._enforceSearch(terms, product)) {
+                  filteredProducts.push(products[i]);
+                }
+              }
+            }
+            this._set_visibleCountOfItems(filteredProducts.length);
+            return filteredProducts;
+          }
+          this._set_visibleCountOfItems(products.length);
+          return products;
+        }
+        this._set_visibleCountOfItems(0);
+        return products;
       },
 
       /**
-       * Count the number of products currently visible.
+       * Process a string of search terms into a set of normalized
+       * terms that are usable for actual searching.
        */
-      _computeVisibleCountOfItems: function(products) {
-        // @TODO: coming soon when filters are a thing
-        return this._computeTotalCountOfItems(products);
+      _processTerms: function(search) {
+        var terms = search.split(" "),
+            filteredTerms = [],
+            i;
+        for (i in terms) {
+          filteredTerms.push(terms[i].toLowerCase());
+        }
+        return filteredTerms;
+      },
+
+      /**
+       * Enforce search terms that the user has entered.
+       */
+      _enforceSearch: function(terms, product) {
+        var properties = ["name", "brand"],
+            prop_i,
+            v,
+            term_i;
+
+        for (prop_i in properties) {
+          // retrieve value for property
+          v = product.value[properties[prop_i]];
+
+          if (typeof v === "string") {
+            v = v.toLowerCase();
+            for (term_i in terms) {
+              if (v.indexOf(terms[term_i]) != -1) {
+                // it matched: we can stop looking
+                return true;
+              }
+            }
+          }
+        }
+        return false;  // no match :(
       },
 
       /**
@@ -225,6 +299,17 @@
         if (Array.isArray(selected))
           return selected;
         return [selected];
+      },
+
+      /**
+       * Observes the value of the search terms entered by
+       * the user, for the purpose of re-rendering after
+       * enforcing the search terms.
+       */
+      _observeSearch: function(terms) {
+        if (terms) {
+          console.log("User searched:", terms);
+        }
       },
 
       /**
