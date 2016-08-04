@@ -7,13 +7,15 @@
     "iron-list": "PolymerElements/iron-list#^1.3.5",
     "paper-item": "PolymerElements/paper-item#^1.2.1",
     "bloombox-styles": "git@github.com:bloombox/bloombox-styles.git#master",
+    "bloombox-icons": "git@github.com:bloombox/bloombox-icons.git#master",
     "paper-toolbar": "PolymerElements/paper-toolbar#^1.1.6",
     "paper-checkbox": "PolymerElements/paper-checkbox#^1.3.0",
     "paper-input": "PolymerElements/paper-input#^1.1.17",
     "paper-button": "PolymerElements/paper-button#^1.0.13",
     "iron-icons": "PolymerElements/iron-icons#^1.1.3",
     "iron-iconset": "PolymerElements/iron-iconset#^1.0.4",
-    "iron-meta": "PolymerElements/iron-meta#^1.1.1"
+    "iron-meta": "PolymerElements/iron-meta#^1.1.1",
+    "iron-label": "PolymerElements/iron-label#^1.0.2"
   },
   "devDependencies": {
     "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",

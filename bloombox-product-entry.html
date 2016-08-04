@@ -12,11 +12,13 @@
 <link rel="import" href="../polymer/polymer.html">
 
 <link rel="import" href="../iron-icon/iron-icon.html">
+<link rel="import" href="../iron-label/iron-label.html">
 <link rel="import" href="../iron-icons/iron-icons.html">
 
 <link rel="import" href="../paper-item/paper-item.html">
 <link rel="import" href="../paper-checkbox/paper-checkbox.html">
 
+<link rel="import" href="../bloombox-icons/bloombox-icons.html">
 <link rel="import" href="../bloombox-styles/bloombox-styles.html">
 
 
@@ -33,25 +35,84 @@
         pointer-events: none;
       }
 
+      :host iron-label {
+        font-size: 80%;
+      }
+
+      /** -- left side -- **/
+      :host paper-item iron-icon {
+        margin-right: 10px;
+      }
+
+      :host paper-item .item-name {
+        margin-right: 30px;
+      }
+
       :host paper-item .entry-data {
         cursor: default;
+      }
+
+      :host paper-item .left-aligned-entry-data {
+        flex: 1 0 210px;
+      }
+
+      :host paper-item .right-aligned-entry-data {
+        flex: 1 1 70%;
+        display: flex;
+      }
+
+      /** -- right side -- **/
+      :host paper-item .product-entry-content {
+        line-height: 13px;
+      }
+
+      :host paper-item .product-testing-content {
+        flex: 2 0 40%;
+      }
+
+      :host paper-item .product-testing-content iron-label .rating-label-name {
+        font-weight: bold;
+        font-size: 60%;
+        margin-right: 8px;
+      }
+
+      :host paper-item .product-pricing-content {
+        flex: 1 1 60%;
+        display: flex;
+        justify-content: flex-end;
+        text-align: center;
+        align-items: center;
       }
     </style>
 
     <paper-item>
-      <div id="entryContainer" class="product-entry-container">
-        <iron-icon icon="warning"></iron-icon>
-        <paper-item-body>
-          <paper-checkbox hidden$="{{!multiselect}}" checked="{{selected}}"></paper-checkbox>
-          <b class="entry-data">{{product.name}}</b>
-        </paper-item-body>
-      </div><!-- end div.product-entry-container -->
+      <iron-icon icon="[[icon]]"></iron-icon>
+      <div class="left-aligned-entry-data">
+        <paper-checkbox hidden$="{{!multiselect}}" checked="{{selected}}"></paper-checkbox>
+        <b class="item-name entry-data">{{product.name}}</b>
+      </div>
+
+      <div class="right-aligned-entry-data">
+        <div class="product-entry-content product-testing-content">
+          <iron-label class="rating-label thc-label"><span class="rating-label-name">THC</span>[[_renderRatingLabel(product.tests.thc)]]</iron-label>
+          <iron-label class="rating-label cbd-label"><span class="rating-label-name">CBD</span>[[_renderRatingLabel(product.tests.cbd)]]</iron-label>
+        </div><!-- end div.product-testing-content -->
+        <div class="product-entry-content product-pricing-content">
+          <div class="pricing-box">
+            <span class="pricing-value">$[[_renderBasePriceValue(product)]][[_renderBasePriceUnit(product)]]</span>
+          </div><!-- end div.pricing-box -->
+        </div>
+      </div><!-- end div.right-aligned-entry-data -->
     </paper-item>
   </template>
   
   <script>
     Polymer.BloomboxProductEntry = Polymer({
       is: 'bloombox-product-entry',
+
+      behaviors: [
+        Polymer.Templatizer
+      ],
 
       properties: {
         /**
@@ -72,6 +133,16 @@
         },
 
         /**
+         * Holds the section for which we are currently
+         * showing data.
+         */
+        section: {
+          type: String,
+          notify: true,
+          reflectToAttribute: true
+        },
+
+        /**
          * Whether the current item is selected or not.
          */
         selected: {
@@ -88,7 +159,98 @@
           type: Boolean,
           notify: true,
           reflectToAttribute: true
+        },
+
+        /**
+         * Computes the icon to show at the beginning of
+         * the row.
+         */
+        icon: {
+          type: String,
+          notify: true,
+          computed: '_computeIcon(section, product)'
+        },
+
+        /**
+         * Holds the templatized object that should be used
+         * to render row details.
+         */
+        template: {
+          type: Object,
+          notify: true,
+          observer: '_observeTemplate'
         }
+      },
+
+      /**
+       * Computes the icon to show at the beginning of the
+       * row for this product.
+       */
+      _computeIcon: function(section, product) {
+        if (section === "flowers") {
+          if (product.species === "Sativa")
+            return "bloombox:sativa-circle";
+          if (product.species === "Indica")
+            return "bloombox:indica-circle";
+        }
+        return "warning";
+      },
+
+      /**
+       * Observes the state of this entry's detail info
+       * template, and keeps `_templatized` up to date
+       * accordingly.
+       */
+      _observeTemplate: function(template) {
+        this._templatized = template;
+      },
+
+      /**
+       * Renders a rating test value into a readable piece
+       * of text for the UI.
+       */
+      _renderRatingLabel: function(value) {
+        if (value === 0 || value === undefined || value == null)
+          return "None";
+        if (value > 100 || Number(value) === value && value % 1 === 0)
+          return [value, "mg"].join("");
+        return [value, "%"].join("");
+      },
+
+      /**
+       * Renders the base price value for this product. Base
+       * price is defined differently based on object type.
+       *
+       * - For weighted pricing, the lowest weight available is
+       *   used. Except for concentrates, this is usually `1g`.
+       * - For unit pricing, the price of each unit is used.
+       */
+      _renderBasePriceValue: function(value) {
+        if (value.pricelist !== undefined) {
+          return value.pricelist.gram.price;
+        } else if (value.pricing !== undefined) {
+          if (value.pricing.unit !== undefined) {
+            return value.pricing.unit.value;
+          } else {
+            // we need to find the smallest weighted size
+            // this is not yet supported
+            // @TODO(sgammon): fully support pricing
+          }
+        }
+        return "error";
+      },
+
+      /**
+       * Renders the postfix for the price in the UI, indicating
+       * the unit by which pricing is decided. Base price and unit
+       * is defined differently based on object type.
+       *
+       * - For weighted pricing, the lowest weight available is
+       *   used. Except for concentrates, this is usually `1g`.
+       * - For unit pricing, the price of each unit is used.
+       */
+      _renderBasePriceUnit: function(value) {
+        return "/g";
       }
     });
   </script>
