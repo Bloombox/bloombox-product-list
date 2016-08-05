@@ -26,14 +26,14 @@
         display: block;
         cursor: pointer;
         width: var(--bloombox-product-list-width, 400px);
-        height: var(--bloombox-product-list-height, 706px);
+        height: var(--bloombox-product-list-height, 506px);
       }
 
       :host div.product-list-container {
         display: block;
         width: 100%;
         overflow: auto;
-        height: calc(var(--bloombox-product-list-height, 706px) - 56px);
+        height: calc(var(--bloombox-product-list-height, 506px) - 56px);
       }
 
       :host div.product-list-container bloombox-product-entry {
@@ -46,11 +46,11 @@
       
       :host div.product-list-container,
       :host div.product-list-container bloombox-product-entry:nth-child(odd) {
-        background: #dedede;
+        background: #eee;
       }
 
       :host div.product-list-container bloombox-product-entry:nth-child(even) {
-        background: #cdcdcd;
+        background: #dfdfdf;
       }
     </style>
 
@@ -191,7 +191,6 @@
         selected: {
           type: Array,
           notify: true,
-          readOnly: true,
           reflectToAttribute: false,
           computed: '_computeSelected(_selected)'
         },
@@ -202,8 +201,7 @@
          */
         search: {
           type: String,
-          nofity: true,
-          observer: '_observeSearch'
+          nofity: true
         }
       },
 
@@ -282,11 +280,12 @@
           if (typeof v === "string") {
             v = v.toLowerCase();
             for (term_i in terms) {
-              if (v.indexOf(terms[term_i]) != -1) {
-                // it matched: we can stop looking
-                return true;
+              if (v.indexOf(terms[term_i]) == -1) {
+                // it failed: we can stop looking
+                return false;
               }
             }
+            return true;
           }
         }
         return false;  // no match :(
@@ -299,17 +298,6 @@
         if (Array.isArray(selected))
           return selected;
         return [selected];
-      },
-
-      /**
-       * Observes the value of the search terms entered by
-       * the user, for the purpose of re-rendering after
-       * enforcing the search terms.
-       */
-      _observeSearch: function(terms) {
-        if (terms) {
-          console.log("User searched:", terms);
-        }
       },
 
       /**

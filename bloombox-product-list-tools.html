@@ -41,7 +41,7 @@ and easily navigating a `<bloombox-product-list>`.
         text-align: right;
       }
 
-      :host paper-toolbar paper-input {
+      :host #searchInput {
         flex: 1 1 40%;
 
         height: 50px;
@@ -49,17 +49,22 @@ and easily navigating a `<bloombox-product-list>`.
 
         --paper-input-container: {
           height: 50px;
+          color: white;
         };
 
-        --paper-input-container-color: white;
-        --paper-input-container-focus-color: white;
-        --paper-input-container-input-color: white;
+        --paper-input-container-color: white !important;
+        --paper-input-container-focus-color: white !important;
+        --paper-input-container-input-color: white !important;
+      }
+
+      input::-webkit-input-placeholder {
+        color: white;
       }
     </style>
 
     <div class="product-list-toolbar-container">
       <paper-toolbar id="productListToolbar">
-        <paper-input placeholder="Search" value="{{search}}" no-float-label></paper-input>
+        <paper-input id="searchInput" label="Search" value="{{search}}" no-float-label></paper-input>
         <div title>[[_titleLabel]]</div>
       </paper-toolbar>
     </div><!-- end .product-list-toolbar-container -->
