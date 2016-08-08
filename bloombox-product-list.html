@@ -25,15 +25,15 @@
       :host {
         display: block;
         cursor: pointer;
-        width: var(--bloombox-product-list-width, 400px);
-        height: var(--bloombox-product-list-height, 506px);
+        width: var(--bloombox-product-list-width, 420px);
+        height: var(--bloombox-product-list-height, 606px);
       }
 
       :host div.product-list-container {
         display: block;
         width: 100%;
         overflow: auto;
-        height: calc(var(--bloombox-product-list-height, 506px) - 56px);
+        height: calc(var(--bloombox-product-list-height, 606px) - 56px);
       }
 
       :host div.product-list-container bloombox-product-entry {
@@ -54,33 +54,41 @@
       }
     </style>
 
+    <array-selector
+      id="selector"
+      items="[[_visibleProducts]]"
+      selected="{{selectedItems}}"
+      multi$="[[multiselect]]"
+      toggle$="[[multiselect]]"></array-selector>
+
     <!-- Controls -->
     <bloombox-product-list-tools
       search="{{search}}"
-      section="{{section}}"
-      heading="{{heading}}"
+      section="[[section]]"
+      heading="[[heading]]"
       multiselect="{{multiselect}}"
       count-of-items="[[_totalCountOfItems]]"
-      count-of-visible-items="[[_visibleCountOfItems]]"></bloombox-product-list-tools>
+      count-of-visible-items="[[_visibleCountOfItems]]"
+      count-of-selected-items="[[_selectedCountOfItems]]"></bloombox-product-list-tools>
 
     <!-- Product List -->
     <div id="listContainer" class="product-list-container">
       <iron-list
          id="productsList"
-         items="{{_visibleProducts}}"
+         items="[[_visibleProducts]]"
          as="product"
          selection-enabled
          multi-selection="{{multiselect}}"
-         selected-items="{{_selected}}"
+         selected-items="{{selectedItems}}"
          role="listbox"
          scroll-target="listContainer">
         <template>
           <bloombox-product-entry
-            key="{{product.key}}"
-            product="{{product.value}}"
+            key="[[product.key]]"
+            product="[[product.value]]"
             section="[[section]]"
-            multiselect$="{{multiselect}}"
-            selected$="{{selected}}"
+            multiselect$="[[multiselect]]"
+            selected="[[selected]]"
             tabindex="[[tabIndex]]"></bloombox-product-entry>
         </template>
       </iron-list>
@@ -121,7 +129,8 @@
         _totalCountOfItems: {
           type: Number,
           notify: true,
-          readOnly: true
+          readOnly: true,
+          value: 0
         },
 
         /**
@@ -131,7 +140,19 @@
         _visibleCountOfItems: {
           type: Number,
           notify: true,
-          readOnly: true
+          readOnly: true,
+          value: 0
+        },
+
+        /**
+         * Computed value counting the number of currently-selected
+         * items.
+         */
+        _selectedCountOfItems: {
+          type: Number,
+          notify: true,
+          readOnly: true,
+          value: 0
         },
 
         /**
@@ -139,11 +160,13 @@
          * and the currently-selected object when in single-select
          * mode.
          */
-        _selected: {
-          type: Object,
+        selectedItems: {
+          type: Array,
           notify: true,
           reflectToAttribute: false,
-          value: null
+          value: function() {
+            return [];
+          }
         },
 
         /**
@@ -152,7 +175,8 @@
         section: {
           type: String,
           nofity: true,
-          reflectToAttribute: true
+          reflectToAttribute: true,
+          observer: '_sectionDidChange'
         },
 
         /**
@@ -185,17 +209,6 @@
         },
 
         /**
-         * Normalizes single- or multi-selected items into a list of
-         * objects.
-         */
-        selected: {
-          type: Array,
-          notify: true,
-          reflectToAttribute: false,
-          computed: '_computeSelected(_selected)'
-        },
-
-        /**
          * Holds the currently-active search submitted by the user,
          * if any.
          */
@@ -204,6 +217,10 @@
           nofity: true
         }
       },
+
+      observers: [
+        '_selectedItemsDidChange(multiselect, selectedItems.*)'
+      ],
 
       /**
        * Computes an array of products from the standard key=>value
@@ -292,15 +309,6 @@
       },
 
       /**
-       * Compute the currently-selected items.
-       */
-      _computeSelected: function(selected) {
-        if (Array.isArray(selected))
-          return selected;
-        return [selected];
-      },
-
-      /**
        * Small utility to convert an object of keys=>values into an array.
        */
       _toArray: function(obj) {
@@ -310,6 +318,34 @@
             value: obj[key]
           };
         });
+      },
+
+      /**
+       * Observes the current section being displayed, and cleans
+       * up any relevant UI before transitioning between sections.
+       */
+      _sectionDidChange: function() {
+        if (!this.multiselect) {
+          this.selectedItems = null;
+        } else {
+          this.selectedItems = [];
+        }
+      },
+
+      /**
+       * Observes changes in selected items and propagates those
+       * changes to count values used in the UI, among other
+       * things.
+       */
+      _selectedItemsDidChange: function(multiselect, selectedItems) {
+        debugger;
+        if (multiselect === true && selectedItems != null) {
+          if (Array.isArray(selectedItems.base) && selectedItems.base.length > 0) {
+            this._set_selectedCountOfItems(selectedItems.base.length);
+          } else {
+            this._set_selectedCountOfItems(0);
+          }
+        }
       }
     });
   </script>

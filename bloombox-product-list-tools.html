@@ -15,9 +15,9 @@ and easily navigating a `<bloombox-product-list>`.
 <link rel="import" href="../iron-iconset/iron-iconset.html">
 
 <link rel="import" href="../paper-input/paper-input.html">
-<link rel="import" href="../paper-button/paper-button.html">
 <link rel="import" href="../paper-toolbar/paper-toolbar.html">
 <link rel="import" href="../paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../paper-icon-button/paper-icon-button.html">
 
 <link rel="import" href="../bloombox-styles/bloombox-styles.html">
 
@@ -25,6 +25,14 @@ and easily navigating a `<bloombox-product-list>`.
 <dom-module id="bloombox-product-list-tools">
   <template>
     <style is="custom-style" include="bloombox-styles">
+      :root {
+        --paper-input-container-input-color: white;
+        --paper-input-container-color: white;
+        --paper-input-container-focus-color: white;
+        --paper-input-container-input-color: white;
+        --paper-icon-button-ink-color: rgba(0, 0, 0, 0.4);
+      }
+
       :host {
         height: 56px;
         display: block;
@@ -37,24 +45,32 @@ and easily navigating a `<bloombox-product-list>`.
       }
 
       :host paper-toolbar div[title] {
-        flex: 1 0 60%;
+        flex: 1 0 40%;
         text-align: right;
+        font-size: 80%;
       }
 
       :host #searchInput {
         flex: 1 1 40%;
 
         height: 50px;
-        margin-top: -30px;
+        margin-top: 4px;
 
         --paper-input-container: {
           height: 50px;
           color: white;
         };
 
-        --paper-input-container-color: white !important;
-        --paper-input-container-focus-color: white !important;
-        --paper-input-container-input-color: white !important;
+        --paper-input-container-color: white;
+        --paper-input-container-focus-color: white;
+        --paper-input-container-input-color: white;
+      }
+
+      :host paper-icon-button {
+        flex: 1 0 30px;
+        max-width: 40px;
+        margin-right: 2px;
+        margin-left: -8px;
       }
 
       input::-webkit-input-placeholder {
@@ -64,7 +80,8 @@ and easily navigating a `<bloombox-product-list>`.
 
     <div class="product-list-toolbar-container">
       <paper-toolbar id="productListToolbar">
-        <paper-input id="searchInput" label="Search" value="{{search}}" no-float-label></paper-input>
+        <paper-icon-button toggles active="{{multiselect}}" icon="list"></paper-icon-button>
+        <paper-input id="searchInput" disabled$="[[multiselect]]" label="Search" value="{{search}}" no-label-float></paper-input>
         <div title>[[_titleLabel]]</div>
       </paper-toolbar>
     </div><!-- end .product-list-toolbar-container -->
@@ -83,7 +100,7 @@ and easily navigating a `<bloombox-product-list>`.
         _titleLabel: {
           type: String,
           notify: true,
-          computed: '_computeTitleLabel(heading, countOfItems, countOfVisibleItems)'
+          computed: '_computeTitleLabel(multiselect, heading, countOfItems, countOfVisibleItems, countOfSelectedItems)'
         },
 
         /**
@@ -102,8 +119,7 @@ and easily navigating a `<bloombox-product-list>`.
         heading: {
           type: Boolean,
           notify: true,
-          reflectToAttribute: true,
-          value: false
+          reflectToAttribute: true
         },
 
         /**
@@ -136,6 +152,16 @@ and easily navigating a `<bloombox-product-list>`.
         },
 
         /**
+         * Holds the current count of selected items, so it may
+         * be displayed when the user is in `multiselect` mode.
+         */
+        countOfSelectedItems: {
+          type: Number,
+          notify: true,
+          value: 0
+        },
+
+        /**
          * Holds the current search terms, submitted by the user
          * if they wish to filter the list.
          */
@@ -145,11 +171,25 @@ and easily navigating a `<bloombox-product-list>`.
         }
       },
 
-      _computeTitleLabel: function(heading, countOfItems, countOfVisibleItems) {
-        if (countOfItems === countOfVisibleItems) {
-          return "Showing " + countOfItems + " " + heading.toLowerCase();
+      _computeTitleLabel: function(multiselect, heading, countOfItems, countOfVisibleItems, countOfSelectedItems) {
+        // Special case: if we're in apothecary, they're called 'items'
+        if (heading.toLowerCase() === "apothecary") {
+          heading = "Items";
         }
-        return "Showing " + countOfVisibleItems + " of " + countOfItems + " " + heading.toLowerCase();
+        if (multiselect !== true) {
+          // is there a search active?
+          if (countOfItems === countOfVisibleItems) {
+            return "Showing " + countOfItems + " " + heading.toLowerCase();
+          }
+          return "Showing " + countOfVisibleItems + " of " + countOfItems + " " + heading.toLowerCase();
+        }
+        if (countOfItems === countOfVisibleItems) {
+          // is there no search active?
+          return "Selected " + countOfSelectedItems + " of " + countOfItems + " " + heading.toLowerCase(); 
+        } else {
+          // there is both a search and multiselect mode
+          return "Selected " + countOfSelectedItems + " of " + countOfVisibleItems + " visible " + heading.toLowerCase();
+        }
       }
     });
   </script>

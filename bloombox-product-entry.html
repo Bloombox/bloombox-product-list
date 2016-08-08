@@ -42,12 +42,14 @@
       /** -- left side -- **/
       :host paper-item iron-icon {
         margin-right: 10px;
-        width: 36px;
-        height: 36px;
+        width: 24px;
+        height: 24px;
       }
 
       :host paper-item .item-name {
         margin-right: 30px;
+        position: relative;
+        top: 2px;
       }
 
       :host paper-item .entry-data {
@@ -56,6 +58,7 @@
 
       :host paper-item .left-aligned-entry-data {
         flex: 1 0 210px;
+        margin-top: 3px;
       }
 
       :host paper-item .right-aligned-entry-data {
@@ -85,26 +88,34 @@
         text-align: center;
         align-items: center;
       }
+
+      :host paper-item-body {
+        width: 100%;
+        display: flex;
+      }
     </style>
 
     <paper-item>
-      <iron-icon icon="[[icon]]"></iron-icon>
-      <div class="left-aligned-entry-data">
-        <paper-checkbox hidden$="{{!multiselect}}" checked="{{selected}}"></paper-checkbox>
-        <b class="item-name entry-data">{{product.name}}</b>
-      </div>
+      <iron-icon icon="[[icon]]" hidden$="{{multiselect}}"></iron-icon>
 
-      <div class="right-aligned-entry-data">
-        <div class="product-entry-content product-testing-content">
-          <iron-label class="rating-label thc-label"><span class="rating-label-name">THC</span>[[_renderRatingLabel(product.tests.thc)]]</iron-label>
-          <iron-label class="rating-label cbd-label"><span class="rating-label-name">CBD</span>[[_renderRatingLabel(product.tests.cbd)]]</iron-label>
-        </div><!-- end div.product-testing-content -->
-        <div class="product-entry-content product-pricing-content">
-          <div class="pricing-box">
-            <span class="pricing-value">$[[_renderBasePriceValue(product)]][[_renderBasePriceUnit(product)]]</span>
-          </div><!-- end div.pricing-box -->
+      <paper-item-body>
+        <div class="left-aligned-entry-data">
+          <paper-checkbox hidden$="{{!multiselect}}" checked="{{selected}}"></paper-checkbox>
+          <b class="item-name entry-data">{{product.name}}</b>
         </div>
-      </div><!-- end div.right-aligned-entry-data -->
+
+        <div class="right-aligned-entry-data">
+          <div class="product-entry-content product-testing-content">
+            <iron-label class="rating-label thc-label"><span class="rating-label-name">THC</span>[[_renderRatingLabel(product.tests.thc)]]</iron-label>
+            <iron-label class="rating-label cbd-label"><span class="rating-label-name">CBD</span>[[_renderRatingLabel(product.tests.cbd)]]</iron-label>
+          </div><!-- end div.product-testing-content -->
+          <div class="product-entry-content product-pricing-content">
+            <div class="pricing-box">
+              <span class="pricing-value">$[[_renderBasePriceValue(product)]][[_renderBasePriceUnit(product)]]</span>
+            </div><!-- end div.pricing-box -->
+          </div>
+        </div><!-- end div.right-aligned-entry-data -->
+      </paper-item-body>
     </paper-item>
   </template>
   
@@ -171,16 +182,6 @@
           type: String,
           notify: true,
           computed: '_computeIcon(section, product)'
-        },
-
-        /**
-         * Holds the templatized object that should be used
-         * to render row details.
-         */
-        template: {
-          type: Object,
-          notify: true,
-          observer: '_observeTemplate'
         }
       },
 
@@ -196,15 +197,6 @@
             return "bloombox:indica-circle";
         }
         return "bloombox:hybrid-circle";
-      },
-
-      /**
-       * Observes the state of this entry's detail info
-       * template, and keeps `_templatized` up to date
-       * accordingly.
-       */
-      _observeTemplate: function(template) {
-        this._templatized = template;
       },
 
       /**
@@ -252,6 +244,9 @@
        * - For unit pricing, the price of each unit is used.
        */
       _renderBasePriceUnit: function(value) {
+        if (value.pricing != undefined && value.pricing.unit != undefined) {
+          return "";
+        }
         return "/g";
       }
     });
