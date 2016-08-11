@@ -59,7 +59,7 @@
       items="[[_visibleProducts]]"
       selected="{{selectedItems}}"
       multi$="[[multiselect]]"
-      toggle$="[[multiselect]]"></array-selector>
+      toggle="[[multiselect]]"></array-selector>
 
     <!-- Controls -->
     <bloombox-product-list-tools
@@ -197,7 +197,8 @@
         products: {
           type: Object,
           notify: true,
-          reflectToAttribute: false
+          reflectToAttribute: false,
+          observer: '_productsDidChange'
         },
 
         /**
@@ -333,11 +334,26 @@
       },
 
       /**
+       * Observes the main list of products provided by the menu
+       * page for changes.
+       */
+      _productsDidChange: function(newProducts, oldProducts) {
+        var that = this;
+        if (oldProducts !== undefined && newProducts !== undefined && newProducts !== null) {
+          console.log("Menu update received...", oldProducts, newProducts);
+          this.async(function() {
+            that._selectedItemsDidChange(that.multiselect, that.selectedItems);
+          });
+        }
+      },
+
+      /**
        * Observes changes in selected items and propagates those
        * changes to count values used in the UI, among other
        * things.
        */
       _selectedItemsDidChange: function(multiselect, selectedItems) {
+        var that = this;
         if (multiselect === true && selectedItems != null) {
           if (Array.isArray(selectedItems.base) && selectedItems.base.length > 0) {
             if (this._selectedCountOfItems !== selectedItems.base.length) {
@@ -346,7 +362,45 @@
           } else {
             this._set_selectedCountOfItems(0);
           }
+        } else if (multiselect === false && (selectedItems == null || (Array.isArray(selectedItems.base) && selectedItems.base.length == 0))) {
+          // we have no selection and we are not in multiselection mode:
+          // select our first entry
+          this.async(function() {
+            if (this.$.productsList.selectedItem === null) {
+              if (this._totalCountOfItems > 0) {
+                this.$.productsList.selectItem(0);
+              } else {
+                // reschedule this function until we can execute it
+                setTimeout(function() {
+                  that._selectedItemsDidChange(multiselect, selectedItems);
+                }, 100);
+              }
+            }
+          });
         }
+      },
+
+      /**
+       * Utility function, exposed publicly to allow super-
+       * components to reach in and clear any selected items,
+       * for instance after bulk edits.
+       */
+      clearSelection: function() {
+        this.$.productsList.clearSelection();
+      },
+
+      /**
+       * Passthrough to `<iron-list>` `deselectItem` method.
+       */
+      deselectItem: function(item) {
+        this.$.productsList.deselectItem(item);
+      },
+
+      /**
+       * Passthrough to `<iron-list>` `selectItem` method.
+       */
+      selectItem: function(item) {
+        this.$.productsList.selectItem(item);
       }
     });
   </script>
