@@ -23,17 +23,17 @@
   <template>
     <style is="custom-style" include="bloombox-styles">
       :host {
-        display: block;
+        display: flex;
         cursor: pointer;
+        flex-direction: column;
         width: var(--bloombox-product-list-width, 420px);
-        height: var(--bloombox-product-list-height, 606px);
       }
 
       :host div.product-list-container {
         display: block;
         width: 100%;
         overflow: auto;
-        height: calc(var(--bloombox-product-list-height, 606px) - 56px);
+        height: 100%;
       }
 
       :host div.product-list-container bloombox-product-entry {
@@ -69,7 +69,8 @@
       multiselect="{{multiselect}}"
       count-of-items="[[_totalCountOfItems]]"
       count-of-visible-items="[[_visibleCountOfItems]]"
-      count-of-selected-items="[[_selectedCountOfItems]]"></bloombox-product-list-tools>
+      count-of-selected-items="[[_selectedCountOfItems]]"
+      class="flex"></bloombox-product-list-tools>
 
     <!-- Product List -->
     <div id="listContainer" class="product-list-container">
@@ -81,6 +82,7 @@
          multi-selection="{{multiselect}}"
          selected-items="{{selectedItems}}"
          role="listbox"
+         class="flex layout vertical"
          scroll-target="listContainer">
         <template>
           <bloombox-product-entry
@@ -324,10 +326,8 @@
        * Observes the current section being displayed, and cleans
        * up any relevant UI before transitioning between sections.
        */
-      _sectionDidChange: function() {
-        if (!this.multiselect) {
-          this.selectedItems = null;
-        } else {
+      _sectionDidChange: function(newValue, oldValue) {
+        if (newValue && oldValue) {
           this.selectedItems = [];
         }
       },
@@ -338,10 +338,11 @@
        * things.
        */
       _selectedItemsDidChange: function(multiselect, selectedItems) {
-        debugger;
         if (multiselect === true && selectedItems != null) {
           if (Array.isArray(selectedItems.base) && selectedItems.base.length > 0) {
-            this._set_selectedCountOfItems(selectedItems.base.length);
+            if (this._selectedCountOfItems !== selectedItems.base.length) {
+              this._set_selectedCountOfItems(selectedItems.base.length);
+            }
           } else {
             this._set_selectedCountOfItems(0);
           }

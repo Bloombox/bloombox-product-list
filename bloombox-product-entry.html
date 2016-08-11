@@ -36,7 +36,7 @@
       }
 
       :host iron-label {
-        font-size: 80%;
+        font-size: 85%;
       }
 
       /** -- left side -- **/
@@ -50,6 +50,7 @@
         margin-right: 30px;
         position: relative;
         top: 2px;
+        display: inline-block;
       }
 
       :host paper-item .entry-data {
@@ -171,7 +172,8 @@
         multiselect: {
           type: Boolean,
           notify: true,
-          reflectToAttribute: true
+          reflectToAttribute: true,
+          observer: '_multiselectDidChange'
         },
 
         /**
@@ -232,6 +234,19 @@
           }
         }
         return "error";
+      },
+
+      /**
+       * Observes changes to `multiselect` and reacts when it is
+       * turned off, namely deselecting any previously-selected
+       * items.
+       */
+      _multiselectDidChange: function(newValue, oldValue) {
+        if (newValue === false && oldValue === true ||
+            newValue === true && oldValue === false) {
+          // we are shutting off or turning on multiselect
+          this.selected = false;
+        }
       },
 
       /**
