@@ -60,7 +60,6 @@
 
       :host paper-item .left-aligned-entry-data {
         flex: 1 0 210px;
-        margin-top: 3px;
       }
 
       :host paper-item .right-aligned-entry-data {
@@ -91,13 +90,25 @@
         align-items: center;
       }
 
+      :host paper-item.product-entry-out-of-stock iron-icon {
+        opacity: 0.3;
+      }
+
+      :host paper-item.product-entry-out-of-stock paper-item-body {
+        opacity: 0.7;
+      }
+
+      :host paper-item.product-entry-out-of-stock paper-item-body .item-name {
+        font-weight: normal !important;
+      }
+
       :host paper-item-body {
         width: 100%;
         display: flex;
       }
     </style>
 
-    <paper-item>
+    <paper-item class$="[[_stockClasses]]">
       <iron-icon icon="[[icon]]" hidden$="{{multiselect}}"></iron-icon>
 
       <paper-item-body>
@@ -130,6 +141,16 @@
       ],
 
       properties: {
+        /**
+         * Computed property that provides a set of classes
+         * to style this product entry.
+         */
+        _stockClasses: {
+          type: String,
+          notify: true,
+          computed: '_computeStockClasses(product)'
+        },
+
         /**
          * Key for the current product object.
          */
@@ -186,6 +207,19 @@
           notify: true,
           computed: '_computeIcon(section, product)'
         }
+      },
+
+      /**
+       * Computes classes that should be applied to this
+       * product entry.
+       */
+      _computeStockClasses: function(product) {
+        var classes = ["product-item-entry-content"];
+        if (product.flags !== undefined &&
+            product.flags.visible === false) {
+          classes.push("product-entry-out-of-stock");
+        }
+        return classes.join(" ");
       },
 
       /**

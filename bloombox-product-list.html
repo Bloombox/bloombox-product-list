@@ -121,7 +121,7 @@
         _visibleProducts: {
           type: Array,
           notify: true,
-          computed: '_computeVisibleProducts(_productsArray, search)'
+          computed: '_computeVisibleProducts(_productsArray, search, instockOnly, saleOnly, hasTestsOnly)'
         },
 
         /**
@@ -217,7 +217,38 @@
          */
         search: {
           type: String,
-          nofity: true
+          notify: true
+        },
+
+        /**
+         * Specifies a filter option whereby only items marked as
+         * `instock` show in the list of products.
+         */
+        instockOnly: {
+          type: Boolean,
+          notify: true,
+          value: true
+        },
+
+        /**
+         * Specifies a filter option whereby only items with a nonzero
+         * value for `sale` show in the list of products.
+         */
+        saleOnly: {
+          type: Boolean,
+          notify: true,
+          value: false
+        },
+
+        /**
+         * Specifies a filter option whereby only items that either
+         * have tests or do *not* have tests are shown in the list
+         * of products.
+         */
+        hasTestsOnly: {
+          type: String,
+          notify: true,
+          value: "all"
         }
       },
 
@@ -244,20 +275,29 @@
        * Computes which products should be visible, given the current
        * state of search and filters.
        */
-      _computeVisibleProducts: function(products, search) {
+      _computeVisibleProducts: function(products, search, instockOnly, saleOnly, hasTestsOnly) {
+        var filteredProducts = [], terms, product;
         if (Array.isArray(products) && products.length > 0) {
           if (search) {
-            filteredProducts = [];
             terms = this._processTerms(search);
-
             if (terms && Array.isArray(terms) && terms.length > 0) {
               for (i in products) {
                 product = products[i];
-
                 // enforce search terms
-                if (this._enforceSearch(terms, product)) {
+                if (this._enforceFilters(instockOnly, saleOnly, hasTestsOnly, product) &&
+                    this._enforceSearch(terms, product)) {
                   filteredProducts.push(products[i]);
                 }
+              }
+            }
+            this._set_visibleCountOfItems(filteredProducts.length);
+            return filteredProducts;
+          } else {
+            // just enforce filters
+            for (i in products) {
+              product = products[i];
+              if (this._enforceFilters(instockOnly, saleOnly, hasTestsOnly, product)) {
+                filteredProducts.push(products[i]);
               }
             }
             this._set_visibleCountOfItems(filteredProducts.length);
@@ -309,6 +349,53 @@
           }
         }
         return false;  // no match :(
+      },
+
+      /**
+       * Enforce filter state that the user has selected via
+       * `<bloombox-menutools>`.
+       */
+      _enforceFilters: function(instockOnly, saleOnly, hasTestsOnly, product) {
+        if (product) {
+
+          if (instockOnly === true) {
+            // instock filter is active
+            if (product.value.flags !== undefined &&
+                product.value.flags.visible === false) {
+              return false;  // rejected because it's not in stock
+            }
+          }
+          if (saleOnly === true) {
+            // sale filter is active
+            if (product.value.flags == undefined ||
+               (product.value.flags.sale < 1 &&
+                product.value.flags.bogo !== true)) {
+              return false;  // rejected because it's not on sale, or BOGO
+            }
+          }
+          if (hasTestsOnly !== "all") {
+            if (hasTestsOnly == "tests") {
+              // filter out products that do not have tests
+              if (product.value.tests == null ||
+                  product.value.tests == undefined ||
+                 (product.value.tests.thc == 0 &&
+                  product.value.tests.cbd == 0)) {
+                return false;  // rejected for not having tests
+              }
+            } else if (hasTestsOnly == "notests") {
+              // filter out products that do have tests
+              if (product.value.tests != null &&
+                  product.value.tests != undefined &&
+                 (product.value.tests.thc > 0 ||
+                  product.value.tests.cbd > 0)) {
+                return false;  // rejected for having tests
+              }
+            } else {
+              console.error("Invalid filter state for `hasTestsOnly`: ", hasTestsOnly);
+            }
+          }
+        }
+        return true;  // product made the cut
       },
 
       /**
