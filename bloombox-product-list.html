@@ -34,6 +34,7 @@
         width: 100%;
         overflow: auto;
         height: 100%;
+        position: relative;
       }
 
       :host div.product-list-container bloombox-product-entry {
@@ -82,7 +83,7 @@
          multi-selection="{{multiselect}}"
          selected-items="{{selectedItems}}"
          role="listbox"
-         class="flex layout vertical"
+         class="flex layout vertical fit"
          scroll-target="listContainer">
         <template>
           <bloombox-product-entry
