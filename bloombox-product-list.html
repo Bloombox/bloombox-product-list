@@ -20,7 +20,7 @@
 
 
 <dom-module id="bloombox-product-list">
-  <template>
+  <template strip-whitespace>
     <style is="custom-style" include="bloombox-styles">
       :host {
         display: flex;
@@ -29,29 +29,41 @@
         width: var(--bloombox-product-list-width, 420px);
       }
 
-      :host div.product-list-container {
+      :host .product-list-container {
         display: block;
         width: 100%;
         overflow: auto;
-        height: 100%;
-        position: relative;
+        position: absolute;
+        top: 64px;
+        bottom: 30px;
+        border-bottom: #a3a3a3;
       }
 
-      :host div.product-list-container bloombox-product-entry {
+      :host .product-list-container bloombox-product-entry {
         height: 50px;
       }
 
-      :host div.product-list-container bloombox-product-entry[selected] {
+      :host .product-list-container bloombox-product-entry[selected] {
         background-color: #fefefe !important;
       }
       
-      :host div.product-list-container,
-      :host div.product-list-container bloombox-product-entry:nth-child(odd) {
+      :host .product-list-container,
+      :host .product-list-container bloombox-product-entry:nth-child(odd) {
         background: #cecece;
       }
 
-      :host div.product-list-container bloombox-product-entry:nth-child(even) {
+      :host .product-list-container bloombox-product-entry:nth-child(even) {
         background: #afafaf;
+      }
+
+      :host #statusLabel {
+        font-size: 9pt;
+        height: 30px;
+        line-height: 30px;
+        background: var(--bloombox-green-primary);
+        color: white;
+        text-transform: uppercase;
+        padding-left: 10px;
       }
     </style>
 
@@ -68,13 +80,10 @@
       section="[[section]]"
       heading="[[heading]]"
       multiselect="{{multiselect}}"
-      count-of-items="[[_totalCountOfItems]]"
-      count-of-visible-items="[[_visibleCountOfItems]]"
-      count-of-selected-items="[[_selectedCountOfItems]]"
       class="flex"></bloombox-product-list-tools>
 
     <!-- Product List -->
-    <div id="listContainer" class="product-list-container">
+    <div id="listContainer" class$="[[_containerClasses]]">
       <iron-list
          id="productsList"
          items="[[_visibleProducts]]"
@@ -96,15 +105,16 @@
         </template>
       </iron-list>
     </div><!-- end div.product-list-container -->
+
+    <!-- Status Label -->
+    <div id="statusLabel">
+      <span class="status-label">[[_statusLabel]]</span>
+    </div><!-- end div#statusLabel -->
   </template>
   
   <script>
     Polymer.BloomboxProductList = Polymer({
       is: 'bloombox-product-list',
-
-      behaviors: [
-        Polymer.Templatizer
-      ],
 
       properties: {
         /**
@@ -123,6 +133,26 @@
           type: Array,
           notify: true,
           computed: '_computeVisibleProducts(_productsArray, search, instockOnly, saleOnly, hasTestsOnly)'
+        },
+
+        /**
+         * Computed property that provides an appropriate status
+         * text for the toolbar depending on the number of items
+         * total and the number of items showing.
+         */
+        _statusLabel: {
+          type: String,
+          notify: true,
+          computed: '_computeStatusLabel(multiselect, heading, _totalCountOfItems, _visibleCountOfItems, _selectedCountOfItems)'
+        },
+
+        /**
+         * Computed set of classes to be applied to the list container.
+         */
+        _containerClasses: {
+          type: String,
+          notify: true,
+          computed: '_computeContainerClasses(multiselect)'
         },
 
         /**
@@ -309,6 +339,41 @@
         }
         this._set_visibleCountOfItems(0);
         return products;
+      },
+
+      /**
+       * Computes a status label for the list of items currently being
+       * viewed.
+       */
+      _computeStatusLabel: function(multiselect, heading, countOfItems, countOfVisibleItems, countOfSelectedItems) {
+        // Special case: if we're in apothecary, they're called 'items'
+        if (heading.toLowerCase() === "apothecary") {
+          heading = "Items";
+        }
+        if (multiselect !== true) {
+          // is there a search active?
+          if (countOfItems === countOfVisibleItems) {
+            return "Showing " + countOfItems + " " + heading.toLowerCase();
+          }
+          return "Showing " + countOfVisibleItems + " of " + countOfItems + " " + heading.toLowerCase();
+        }
+        if (countOfItems === countOfVisibleItems) {
+          // is there no search active?
+          return "Selected " + countOfSelectedItems + " of " + countOfItems + " " + heading.toLowerCase(); 
+        } else {
+          // there is both a search and multiselect mode
+          return "Selected " + countOfSelectedItems + " of " + countOfVisibleItems + " visible " + heading.toLowerCase();
+        }
+      },
+
+      /**
+       * Computes classes that should be applied to the list container
+       * div.
+       */
+      _computeContainerClasses: function(multiselect) {
+        if (multiselect === true)
+          return "product-list-container multiselect";
+        return "product-list-container";
       },
 
       /**

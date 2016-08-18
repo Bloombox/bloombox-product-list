@@ -23,7 +23,7 @@ and easily navigating a `<bloombox-product-list>`.
 
 
 <dom-module id="bloombox-product-list-tools">
-  <template>
+  <template strip-whitespace>
     <style is="custom-style" include="bloombox-styles">
       :root {
         --paper-input-container-input-color: white;
@@ -43,12 +43,6 @@ and easily navigating a `<bloombox-product-list>`.
         width: var(--bloombox-product-list-width, 420px);
         --paper-toolbar-height: 56px;
         --paper-toolbar-sm-height: 56px;
-      }
-
-      :host paper-toolbar div[title] {
-        flex: 1 0 40%;
-        text-align: right;
-        font-size: 80%;
       }
 
       :host #searchInput {
@@ -83,7 +77,6 @@ and easily navigating a `<bloombox-product-list>`.
       <paper-toolbar id="productListToolbar">
         <paper-icon-button toggles active="{{multiselect}}" icon="list"></paper-icon-button>
         <paper-input id="searchInput" disabled$="[[multiselect]]" label="Search" value="{{search}}" no-label-float></paper-input>
-        <div title>[[_titleLabel]]</div>
       </paper-toolbar>
     </div><!-- end .product-list-toolbar-container -->
   </template>
@@ -93,17 +86,6 @@ and easily navigating a `<bloombox-product-list>`.
       is: 'bloombox-product-list-tools',
 
       properties: {
-        /**
-         * Computed property that provides an appropriate label
-         * for the toolbar depending on the number of items
-         * total and the number of items showing.
-         */
-        _titleLabel: {
-          type: String,
-          notify: true,
-          computed: '_computeTitleLabel(multiselect, heading, countOfItems, countOfVisibleItems, countOfSelectedItems)'
-        },
-
         /**
          * Current section that we are displaying tools for.
          */
@@ -134,62 +116,12 @@ and easily navigating a `<bloombox-product-list>`.
         },
 
         /**
-         * Holds the current count of total items, so it may
-         * be displayed to the user when things are filtered
-         * out.
-         */
-        countOfItems: {
-          type: Number,
-          notify: true
-        },
-
-        /**
-         * Holds the current count of visible items, so it may
-         * be displayed to the user when things are filtered out.
-         */
-        countOfVisibleItems: {
-          type: Number,
-          notify: true
-        },
-
-        /**
-         * Holds the current count of selected items, so it may
-         * be displayed when the user is in `multiselect` mode.
-         */
-        countOfSelectedItems: {
-          type: Number,
-          notify: true,
-          value: 0
-        },
-
-        /**
          * Holds the current search terms, submitted by the user
          * if they wish to filter the list.
          */
         search: {
           type: String,
           notify: true
-        }
-      },
-
-      _computeTitleLabel: function(multiselect, heading, countOfItems, countOfVisibleItems, countOfSelectedItems) {
-        // Special case: if we're in apothecary, they're called 'items'
-        if (heading.toLowerCase() === "apothecary") {
-          heading = "Items";
-        }
-        if (multiselect !== true) {
-          // is there a search active?
-          if (countOfItems === countOfVisibleItems) {
-            return "Showing " + countOfItems + " " + heading.toLowerCase();
-          }
-          return "Showing " + countOfVisibleItems + " of " + countOfItems + " " + heading.toLowerCase();
-        }
-        if (countOfItems === countOfVisibleItems) {
-          // is there no search active?
-          return "Selected " + countOfSelectedItems + " of " + countOfItems + " " + heading.toLowerCase(); 
-        } else {
-          // there is both a search and multiselect mode
-          return "Selected " + countOfSelectedItems + " of " + countOfVisibleItems + " visible " + heading.toLowerCase();
         }
       }
     });
