@@ -41,10 +41,21 @@
 
       :host .product-list-container bloombox-product-entry {
         height: 50px;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
       }
 
       :host .product-list-container bloombox-product-entry[selected] {
         background-color: #fefefe !important;
+        pointer-events: none;
+      }
+
+      :host .product-list-container.multiselect bloombox-product-entry[selected] {
+        pointer-events: inherit;
       }
       
       :host .product-list-container,
