@@ -30,6 +30,10 @@
         background: white;
       }
 
+      :host div[hidden] {
+        display: none;
+      }
+
       :host paper-item {
         height: 50px;
         pointer-events: none;
@@ -117,7 +121,7 @@
           <b class="item-name entry-data">{{product.name}}</b>
         </div>
 
-        <div class="right-aligned-entry-data">
+        <div class="right-aligned-entry-data" hidden$="{{multiselect}}">
           <div class="product-entry-content product-testing-content">
             <iron-label class="rating-label thc-label"><span class="rating-label-name">THC</span>[[_renderRatingLabel(product.tests.thc)]]</iron-label>
             <iron-label class="rating-label cbd-label"><span class="rating-label-name">CBD</span>[[_renderRatingLabel(product.tests.cbd)]]</iron-label>
