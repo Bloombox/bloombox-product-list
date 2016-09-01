@@ -267,8 +267,16 @@
           if (value.pricing.unit !== undefined) {
             return value.pricing.unit.value;
           } else {
-            if (value.pricing.quartergram !== undefined) {
-
+            if (value.pricing.gram !== undefined &&
+                value.pricing.gram.value > 0) {
+              return value.pricing.gram.value;
+            } else if (value.pricing.quartergram !== undefined &&
+                       value.pricing.quartergram > 0) {
+              return value.pricing.quartergram.value;
+            } else if (value.pricing.halfgram !== undefined) {
+              return value.pricing.halfgram.value;
+            } else {
+              console.warn("Unable to render pricing for value.", value);
             }
           }
         }
@@ -298,10 +306,26 @@
        * - For unit pricing, the price of each unit is used.
        */
       _renderBasePriceUnit: function(value) {
-        if (value.pricing != undefined && value.pricing.unit != undefined) {
-          return "";
+        if (value.pricelist !== undefined) {
+          return "/g";
+        } else if (value.pricing !== undefined) {
+          if (value.pricing.unit !== undefined) {
+            return "";
+          } else {
+            if (value.pricing.gram !== undefined &&
+                value.pricing.gram.value > 0) {
+              return "/g";
+            } else if (value.pricing.quartergram !== undefined &&
+                       value.pricing.quartergram > 0) {
+              return "/.25g";
+            } else if (value.pricing.halfgram !== undefined) {
+              return "/.5g";
+            } else {
+              console.warn("Unable to render pricing base for value.", value);
+            }
+          }
         }
-        return "/g";
+        return "";
       }
     });
   </script>
