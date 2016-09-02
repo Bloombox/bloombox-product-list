@@ -124,6 +124,8 @@
   </template>
   
   <script>
+    var __productListBooted = false;
+
     Polymer.BloomboxProductList = Polymer({
       is: 'bloombox-product-list',
 
@@ -535,13 +537,18 @@
             if (this.$.productsList.selectedItem === null) {
               if (this._totalCountOfItems > 0 &&
                   Array.isArray(products) &&
-                  products.length > 0) {
+                  products.length > 0 &&
+                  Array.isArray(this.$.productsList.items) &&
+                  this.$.productsList.items.length > 0) {
+                __productListBooted = true;
                 this.$.productsList.selectItem(0);
               } else {
-                // reschedule this function until we can execute it
-                setTimeout(function() {
-                  that._selectedItemsDidChange(multiselect, selectedItems);
-                }, 150);
+                if (!__productListBooted) {
+                  // reschedule this function until we can execute it
+                  setTimeout(function() {
+                    that._selectedItemsDidChange(multiselect, selectedItems);
+                  }, 150);
+                }
               }
             }
           });
