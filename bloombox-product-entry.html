@@ -71,6 +71,11 @@
         display: flex;
       }
 
+      :host paper-item .left-aligned-entry-data div[secondary] {
+        display: flex;
+        font-size: 75%;
+      }
+
       /** -- right side -- **/
       :host paper-item .product-entry-content {
         line-height: 13px;
@@ -78,6 +83,10 @@
 
       :host paper-item .product-testing-content {
         flex: 2 0 40%;
+      }
+
+      :host paper-item.branded-product .product-testing-content {
+        margin-top: 10px;
       }
 
       :host paper-item .product-testing-content iron-label .rating-label-name {
@@ -113,15 +122,19 @@
     </style>
 
     <paper-item class$="[[_stockClasses]]">
-      <iron-icon icon="[[icon]]" hidden$="{{multiselect}}"></iron-icon>
+      <iron-icon icon="[[icon]]" hidden$="[[multiselect]]"></iron-icon>
 
-      <paper-item-body>
+      <paper-item-body two-line$="[[_hasBrand]]">
         <div class="left-aligned-entry-data">
-          <paper-checkbox hidden$="{{!multiselect}}" checked="{{selected}}"></paper-checkbox>
-          <b class="item-name entry-data">{{product.name}}</b>
+          <paper-checkbox hidden$="[[!multiselect]]" checked="{{selected}}"></paper-checkbox>
+          <b class="item-name entry-data">[[product.name]]</b>
+
+          <div secondary hidden$="[[!_hasBrand]]">
+            <span class="product-entry-brand">[[product.brand]]</span>
+          </div>
         </div>
 
-        <div class="right-aligned-entry-data" hidden$="{{multiselect}}">
+        <div class="right-aligned-entry-data" hidden$="[[multiselect]]">
           <div class="product-entry-content product-testing-content">
             <iron-label class="rating-label thc-label"><span class="rating-label-name">THC</span>[[_renderRatingLabel(product.tests.thc)]]</iron-label>
             <iron-label class="rating-label cbd-label"><span class="rating-label-name">CBD</span>[[_renderRatingLabel(product.tests.cbd)]]</iron-label>
@@ -152,7 +165,17 @@
         _stockClasses: {
           type: String,
           notify: true,
-          computed: '_computeStockClasses(product)'
+          computed: '_computeStockClasses(product, _hasBrand)'
+        },
+
+        /**
+         * Computed property to indicate to the UI that we
+         * have a valid product brand.
+         */
+        _hasBrand: {
+          type: Boolean,
+          notify: true,
+          computed: '_computeHasBrand(product)'
         },
 
         /**
@@ -217,13 +240,26 @@
        * Computes classes that should be applied to this
        * product entry.
        */
-      _computeStockClasses: function(product) {
+      _computeStockClasses: function(product, hasBrand) {
         var classes = ["product-item-entry-content"];
         if (product.flags !== undefined &&
             product.flags.visible === false) {
           classes.push("product-entry-out-of-stock");
         }
+        if (hasBrand === true)
+          classes.push("branded-product");
         return classes.join(" ");
+      },
+
+      /**
+       * Computes the presence of a valid brand on the
+       * current product.
+       */
+      _computeHasBrand: function(product) {
+        return product.brand != null
+               && product.brand !== undefined
+               && typeof product.brand === "string"
+               && product.brand.length > 0;
       },
 
       /**
