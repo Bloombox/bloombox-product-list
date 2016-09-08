@@ -1,0 +1,384 @@
+
+<!--
+`<bloombox-printed-product-list>` provides UI similar to `<bloombox-product-list>`, but tailor-made
+for printing on paper.
+
+@group Bloombox Elements
+@element bloombox-printed-product-list
+@demo demo/index.html
+@homepage bloombox.github.io
+-->
+
+<link rel="import" href="../polymer/polymer.html">
+
+<link rel="import" href="../iron-list/iron-list.html">
+<link rel="import" href="../paper-item/paper-item.html">
+
+<link rel="import" href="../bloombox-styles/bloombox-styles.html">
+
+<link rel="import" href="./bloombox-product-entry.html">
+
+
+<dom-module id="bloombox-printed-product-list">
+  <template strip-whitespace>
+    <style is="custom-style" include="bloombox-styles">
+      :host {
+        display: flex;
+        cursor: default;
+        flex-direction: column;
+        pointer-events: none;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        cursor: default;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+      }
+
+      :host h1 {
+        position: relative;
+        top: 10px;
+        padding: 0;
+        -webkit-margin-before: 0;
+        -webkit-margin-after: 0;
+        -webkit-margin-start: 0;
+        -webkit-margin-end: 0;
+      }
+
+      :host #listContainer bloombox-product-entry {
+        height: 50px;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        pointer-events: none;
+        cursor: default;
+      }
+
+      :host #listContainer,
+      :host #listContainer .menu-list-items bloombox-product-entry:nth-child(odd) {
+        background: #fff;
+      }
+
+      :host #listContainer .menu-list-items bloombox-product-entry:nth-child(even) {
+        background: #efefef;
+      }
+
+      :host div.printed-header-row {
+        display: flex;
+        justify-content: flex-end;
+        height: 20px;
+        border-bottom: 1px solid #111;
+      }
+
+      :host div.printed-header-row .price-header-spacer {
+        flex: 1 1 30%;
+        background: blue;
+        min-width: 200px;
+        display: inline-block;
+      }
+
+      :host div.printed-header-row .printed-header-values {
+        flex: 0 1 70%;
+        justify-content: flex-end;
+        display: inline-flex;
+      }
+
+      :host div.printed-header-row .price-header-value {
+        width: 100px;
+        height: 20px;
+        display: inline-block;
+        text-align: center;
+        font-weight: bold;
+      }
+
+      :host .menu-list-items {
+        position: absolute;
+        top: 60px;
+        left: 0;
+        right: 0;
+      }
+    </style>
+
+    <!-- Product List -->
+    <div id="listContainer" class="flex layout vertical fit product-list-container">
+      <h1>Menu: [[heading]]</h1>
+
+      <div class="printed-header-row">
+        <div class="printed-header-spacer"></div><!-- end div.printed-header-spacer -->
+        <div class="printed-header-values">
+        <template is="dom-repeat" items="[[_itemPriceTiers]]" as="price">
+          <span class="price-header-value">[[_renderPriceLabel(price)]]</span>
+        </template>
+        </div><!-- end div.printed-header-values -->
+      </div><!-- end div.printed-header-row -->
+
+      <div class="menu-list-items">
+        <template
+           id="productsList"
+           is="dom-repeat"
+           items="[[_productsArray]]"
+           as="product"
+           role="listbox"
+           class="flex layout vertical fit"
+           strip-whitespace>
+          <bloombox-product-entry
+            key="[[product.key]]"
+            product="[[product.value]]"
+            section="[[section]]"
+            partner="[[partner]]"
+            environment="[[environment]]"
+            all-prices></bloombox-product-entry>
+        </template>
+      </div><!-- end div.menu-list-items -->
+    </div><!-- end div.product-list-container -->
+  </template>
+  
+  <script>
+    var productPriceTierLabels = {
+          "quartergram": ".25g",
+          "halfgram": ".5g",
+          "gram": "1g",
+          "eighth": "3.5g",
+          "quarter": "7g",
+          "half": "14g",
+          "ounce": "28g"
+        },
+
+        productPriceTierOrder = [
+          "quartergram",
+          "halfgram",
+          "gram",
+          "eighth",
+          "quarter",
+          "half",
+          "ounce"
+        ];
+
+    Polymer.BloomboxPrintedProductList = Polymer({
+      is: 'bloombox-printed-product-list',
+
+      properties: {
+        /**
+         * Computed final array of products we will be displaying.
+         */
+        _productsArray: {
+          type: Array,
+          notify: true,
+          computed: '_computeProductsArray(products)'
+        },
+
+        /**
+         * Computed property that provides an array of each price
+         * tier for a given product, should the product be
+         * displaying in `allPrices` mode.
+         */
+        _itemPriceTiers: {
+          type: Array,
+          notify: true,
+          computed: '_computeItemPriceTiers(_productsArray)'
+        },
+
+        /**
+         * Section we are displaying products for.
+         */
+        section: {
+          type: String,
+          nofity: true,
+          reflectToAttribute: true
+        },
+
+        /**
+         * Human-friendly label for the section we are displaying
+         * products for.
+         */
+        heading: {
+          type: String,
+          notify: true,
+          reflectToAttribute: true
+        },
+
+        /**
+         * List of products that should be displayed in the list widget.
+         */
+        products: {
+          type: Object,
+          notify: true,
+          reflectToAttribute: false
+        },
+
+        /**
+         * Currently-active partner that we are rendering this
+         * data for. Examples include `abatin` and `mm`.
+         */
+        partner: {
+          type: String,
+          notify: true
+        },
+
+        /**
+         * Currently-active dashboard environment that we are
+         * rendering this data under. Examples include `v1` and
+         * `sandbox`.
+         */
+        environment: {
+          type: String,
+          notify: false
+        }
+      },
+
+      /**
+       * Small utility to convert an object of keys=>values into an array.
+       */
+      _toArray: function(obj) {
+        return Object.keys(obj).map(function(key) {
+          return {
+            key: key,
+            value: obj[key]
+          };
+        });
+      },
+
+      /**
+       * Retrieves the base comparable price for two products undergoing a
+       * comparison during sort.
+       */
+      _getBasePrice: function(product) {
+        var value;
+        if (product !== undefined && product !== null) {
+          value = product.value;
+          if (value.pricelist !== undefined) {
+            return value.pricelist.gram.price;
+          }
+        }
+        console.warn("Unable to determine base comparable price for subject product:", product);
+        return 0;
+      },
+
+      /**
+       * Returns `true` or `false` depending on whether `product` has test
+       * results listed.
+       */
+      _hasTests: function(product) {
+        return (product.value !== null && product.value !== undefined &&
+                product.value.tests !== null && product.value.tests !== undefined &&
+                typeof product.value.tests === "object" && ((
+                  product.value.tests.thc !== undefined && product.value.tests.thc !== null && product.value.tests.thc > 0.0) ||
+                  product.value.tests.cbd !== undefined && product.value.tests.cbd !== null && product.value.tests.cbd > 0.0));
+      },
+
+      /**
+       * Returns `true` or `false` depending on whether `product` is marked
+       * as `premium`.
+       */
+      _isPremiumProduct: function(product) {
+        return (product && product.flags) ? product.flags.premium : false;
+      },
+
+      /**
+       * Extracts a named test result value from a product's test results,
+       * for the purposes of comparison during sort.
+       */
+      _getTestValue: function(product, datapoint) {
+        return (product && product.value && product.value.tests && product.value.tests[datapoint]) ?
+               product.value.tests[datapoint] : 0.0;
+      },
+
+      /**
+       * Sorts products as they should be shown on a printed menu. The logic
+       * for this is quite simple:
+       * 1) Sort by `basePrice`
+       * 2) Sort products marked `premium` first
+       * 3) Sort by THC value and then CBD value
+       */
+      _sortProducts: function(productsList) {
+        var that = this;
+        return productsList.sort(function(a, b) {
+          // if one price is greater than the other, sort it first
+          if (that._getBasePrice(a) < that._getBasePrice(b)) {
+            return 1;
+          } else if (that._getBasePrice(b) < that._getBasePrice(a)) {
+            return -1;
+          } else {
+            // base prices are equal: disambiguate by `premium`
+            if (!that._isPremiumProduct(a) && that._isPremiumProduct(b)) {
+              return 1;
+            } else if (!that._isPremiumProduct(b) && that._isPremiumProduct(a)) {
+              return -1;
+            } else {
+              // base prices are equal and both are premium or not: disambiguate via tests
+              if (!that._hasTests(a) && that._hasTests(b)) {
+                return 1;
+              } else if (!that._hasTests(b) && that._hasTests(a)) {
+                return -1;
+              } else {
+                // both have tests: disambiguate via THC value
+                if (that._getTestValue(a, "thc") < that._getTestValue(b, "thc")) {
+                  return 1;
+                } else if (that._getTestValue(b, "thc") < that._getTestValue(a, "thc")) {
+                  return -1;
+                }
+              }
+            }
+          }
+          return 0;  
+        });
+      },
+
+      /**
+       * Computes an array of products from the standard key=>value
+       * object format used by underlying storage.
+       */
+      _computeProductsArray: function(products) {
+        var converted;
+        if (typeof products === "object") {
+          converted = this._toArray(products);
+          return this._sortProducts(converted);
+        }
+        return [];
+      },
+
+      /**
+       * Computes price tiers for the displayed products, for the purpose
+       * of rendering a header with column names.
+       */
+      _computeItemPriceTiers: function(products) {
+        var i, p, t, tiers = [], product;
+        if (Array.isArray(products) && products.length > 0) {
+          product = products[0].value;
+          if (product.pricelist !== undefined) {
+            for (i in productPriceTierOrder) {
+              t = productPriceTierOrder[i];
+              if (product.pricelist[t] !== undefined) {
+                p = product.pricelist[t];
+                tiers.push({
+                  tier: t,
+                  label: productPriceTierLabels[t],
+                  available: p.available,
+                  value: p.price
+                });
+              }
+            }
+          }
+          return tiers;
+        }
+        return [];
+      },
+
+      /**
+       * Render a header label for a particular product price tier.
+       */
+      _renderPriceLabel: function(price) {
+        return price.label;
+      }
+    });
+  </script>
+</dom-module>

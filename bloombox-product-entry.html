@@ -39,6 +39,11 @@
         pointer-events: none;
       }
 
+      :host paper-item,
+      :host paper-item paper-item-body {
+        max-height: 50px;
+      }
+
       :host iron-label {
         font-size: 85%;
         display: block;
@@ -56,6 +61,17 @@
         position: relative;
         top: 2px;
         display: inline-block;
+      }
+
+      :host paper-item.all-pricing {
+        min-width: 885px;
+      }
+
+      :host paper-item.all-pricing .item-name {
+        display: inline-block;
+        height: 50px;
+        line-height: 50px;
+        top: 0;
       }
 
       :host paper-item .entry-data {
@@ -81,8 +97,20 @@
         line-height: 13px;
       }
 
+      :host paper-item.all-pricing .product-testing-content {
+        flex: 2 0 20%;
+        height: 50px;
+        line-height: 16px;
+        margin-top: 7px;
+      }
+
+      :host paper-item.all-pricing .price-value-unavailable {
+        opacity: 0.4;
+        color: #888;
+      }
+
       :host paper-item .product-testing-content {
-        flex: 2 0 40%;
+        flex: 2 0 20%;
       }
 
       :host paper-item.branded-product .product-testing-content {
@@ -91,7 +119,7 @@
 
       :host paper-item .product-testing-content iron-label .rating-label-name {
         font-weight: bold;
-        font-size: 60%;
+        font-size: 80%;
         margin-right: 8px;
       }
 
@@ -119,6 +147,19 @@
         width: 100%;
         display: flex;
       }
+
+      :host paper-item-body .right-aligned-entry-data .pricing-box {
+        display: inline-block;
+        white-space: nowrap;
+      }
+
+      :host paper-item-body .right-aligned-entry-data .pricing-box .tiered-pricing-value {
+        font-size: 14pt;
+        width: 100px;
+        display: inline-block;
+        height: 50px;
+        line-height: 50px;
+      }
     </style>
 
     <paper-item class$="[[_stockClasses]]">
@@ -127,7 +168,7 @@
       <paper-item-body two-line$="[[_hasBrand]]">
         <div class="left-aligned-entry-data">
           <paper-checkbox hidden$="[[!multiselect]]" checked="{{selected}}"></paper-checkbox>
-          <b class="item-name entry-data">[[product.name]]</b>
+          <b class="item-name entry-data">[[_renderProductName(product, partner)]]</b>
 
           <div secondary hidden$="[[!_hasBrand]]">
             <span class="product-entry-brand">[[product.brand]]</span>
@@ -141,7 +182,14 @@
           </div><!-- end div.product-testing-content -->
           <div class="product-entry-content product-pricing-content">
             <div class="pricing-box">
-              <span class="pricing-value">$[[_renderBasePriceValue(product)]][[_renderBasePriceUnit(product)]]</span>
+              <template is="dom-if" if="[[!allPrices]]" strip-whitespace>
+                <span class="pricing-value">$[[_renderBasePriceValue(product)]][[_renderBasePriceUnit(product)]]</span>
+              </template>
+              <template is="dom-if" if="[[allPrices]]" strip-whitespace>
+                <template is="dom-repeat" items="[[_itemPriceTiers]]" as="price">
+                  <span class$="[[_renderPriceClasses(price)]]">$[[_renderTieredPriceValue(price)]]</span>
+                </template>
+              </template>
             </div><!-- end div.pricing-box -->
           </div>
         </div><!-- end div.right-aligned-entry-data -->
@@ -150,12 +198,28 @@
   </template>
   
   <script>
+    var productPriceTierLabels = {
+          "quartergram": ".25g",
+          "halfgram": ".5g",
+          "gram": "g",
+          "eighth": "3.5g",
+          "quarter": "7g",
+          "half": "14g",
+          "ounce": "28g"
+        },
+
+        productPriceTierOrder = [
+          "quartergram",
+          "halfgram",
+          "gram",
+          "eighth",
+          "quarter",
+          "half",
+          "ounce"
+        ];
+
     Polymer.BloomboxProductEntry = Polymer({
       is: 'bloombox-product-entry',
-
-      behaviors: [
-        Polymer.Templatizer
-      ],
 
       properties: {
         /**
@@ -165,7 +229,7 @@
         _stockClasses: {
           type: String,
           notify: true,
-          computed: '_computeStockClasses(product, _hasBrand)'
+          computed: '_computeStockClasses(product, _hasBrand, allPrices)'
         },
 
         /**
@@ -176,6 +240,36 @@
           type: Boolean,
           notify: true,
           computed: '_computeHasBrand(product)'
+        },
+
+        /**
+         * Computed property that provides an array of each
+         * price tier for a given product, should the product
+         * be displaying in `allPrices` mode.
+         */
+        _itemPriceTiers: {
+          type: Array,
+          notify: true,
+          computed: '_computeItemPriceTiers(product)'
+        },
+
+        /**
+         * Currently-active partner that we are rendering this
+         * data for. Examples include `abatin` and `mm`.
+         */
+        partner: {
+          type: String,
+          notify: true
+        },
+
+        /**
+         * Currently-active dashboard environment that we are
+         * rendering this data under. Examples include `v1` and
+         * `sandbox`.
+         */
+        environment: {
+          type: String,
+          notify: false
         },
 
         /**
@@ -216,12 +310,24 @@
         },
 
         /**
+         * Whether we should show all prices, or just the most
+         * sensible/popular one.
+         */
+        allPrices: {
+          type: Boolean,
+          notify: true,
+          value: false,
+          reflectToAttribute: true
+        },
+
+        /**
          * Activate or deactivate multiselection UI.
          */
         multiselect: {
           type: Boolean,
           notify: true,
           reflectToAttribute: true,
+          value: false,
           observer: '_multiselectDidChange'
         },
 
@@ -240,7 +346,7 @@
        * Computes classes that should be applied to this
        * product entry.
        */
-      _computeStockClasses: function(product, hasBrand) {
+      _computeStockClasses: function(product, hasBrand, allPrices) {
         var classes = ["product-item-entry-content"];
         if (product.flags !== undefined &&
             product.flags.visible === false) {
@@ -248,6 +354,8 @@
         }
         if (hasBrand === true)
           classes.push("branded-product");
+        if (allPrices === true)
+          classes.push("all-pricing");
         return classes.join(" ");
       },
 
@@ -274,6 +382,54 @@
             return "bloombox:indica-circle";
         }
         return "bloombox:hybrid-circle";
+      },
+
+      /**
+       * Compute the price tiers that should be shown for an
+       * object that is being rendered in `allPrices` mode.
+       */
+      _computeItemPriceTiers: function(product) {
+        var i, p, t, tiers = [];
+        if (product.pricelist !== undefined) {
+          for (i in productPriceTierOrder) {
+            t = productPriceTierOrder[i];
+            if (product.pricelist[t] !== undefined) {
+              p = product.pricelist[t];
+              tiers.push({
+                tier: t,
+                label: productPriceTierLabels[t],
+                available: p.available,
+                value: p.price
+              });
+            }
+          }
+        }
+        return tiers;
+      },
+
+      /**
+       * Observes changes to `multiselect` and reacts when it is
+       * turned off, namely deselecting any previously-selected
+       * items.
+       */
+      _multiselectDidChange: function(newValue, oldValue) {
+        if (newValue === false && oldValue === true ||
+            newValue === true && oldValue === false) {
+          // we are shutting off or turning on multiselect
+          this.selected = false;
+        }
+      },
+
+      /**
+       * Render a product name as it should be shown, according to
+       * the currently-active partner and product flags.
+       */
+      _renderProductName: function(product, partner) {
+        var name = product.name,
+            flags = product.flags;
+        if (partner === "abatin" && (flags !== undefined && flags !== null && flags.premium === true))
+          return "MPMH " + name;
+        return name;
       },
 
       /**
@@ -323,19 +479,6 @@
       },
 
       /**
-       * Observes changes to `multiselect` and reacts when it is
-       * turned off, namely deselecting any previously-selected
-       * items.
-       */
-      _multiselectDidChange: function(newValue, oldValue) {
-        if (newValue === false && oldValue === true ||
-            newValue === true && oldValue === false) {
-          // we are shutting off or turning on multiselect
-          this.selected = false;
-        }
-      },
-
-      /**
        * Renders the postfix for the price in the UI, indicating
        * the unit by which pricing is decided. Base price and unit
        * is defined differently based on object type.
@@ -365,6 +508,27 @@
           }
         }
         return "";
+      },
+
+      /**
+       * Renders a price value and unit for an arbitrary price tier,
+       * when rendering `allPrices` for a given product.
+       */
+      _renderTieredPriceValue: function(price) {
+        return [price.value].join("/");
+      },
+
+      /**
+       * Generate a list of classes to add to a particular price box
+       * for a particular item, based on the price data and whether
+       * the product is `available` at that weight/price.
+       */
+      _renderPriceClasses: function(price) {
+        var cls = ["pricing-value", "tiered-pricing-value"];
+        if (price.available !== true) {
+          cls.push("price-value-unavailable");
+        }
+        return cls.join(" ");
       }
     });
   </script>
