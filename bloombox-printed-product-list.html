@@ -35,7 +35,7 @@ for printing on paper.
         user-select: none;
         cursor: default;
         position: absolute;
-        top: 0;
+        top: 10px;
         left: 0;
         right: 0;
         bottom: 0;
@@ -43,7 +43,7 @@ for printing on paper.
 
       :host h1 {
         position: relative;
-        top: 10px;
+        top: 20px;
         padding: 0;
         -webkit-margin-before: 0;
         -webkit-margin-after: 0;
@@ -93,11 +93,13 @@ for printing on paper.
       }
 
       :host div.printed-header-row .price-header-value {
-        width: 100px;
+        min-width: 80px;
+        max-width: 100px;
         height: 20px;
         display: inline-block;
         text-align: center;
         font-weight: bold;
+        margin-left: 3px;
       }
 
       :host .menu-list-items {
