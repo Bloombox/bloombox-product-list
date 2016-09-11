@@ -427,7 +427,15 @@
        */
       _renderProductName: function(product, partner) {
         var name = product.name,
-            flags = product.flags;
+            flags = product.flags,
+            grow = product.grow;
+        if (partner === "abatin" && (grow !== undefined && grow !== null && typeof grow === "string")) {
+          if (grow === "Greenhouse") {
+            name = "GH " + name;
+          } else if (grow === "Outdoor") {
+            name = "FS " + name;
+          }
+        }
         if (partner === "abatin" && (flags !== undefined && flags !== null && flags.premium === true))
           return "MPMH " + name;
         return name;
