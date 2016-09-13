@@ -112,6 +112,7 @@
             section="[[section]]"
             multiselect$="[[multiselect]]"
             selected="[[selected]]"
+            partner="[[partner]]"
             tabindex="[[tabIndex]]"></bloombox-product-entry>
         </template>
       </iron-list>
@@ -243,6 +244,15 @@
           notify: true,
           reflectToAttribute: false,
           observer: '_productsDidChange'
+        },
+
+        /**
+         * Active partner.
+         */
+        partner: {
+          type: String,
+          notify: true,
+          reflectToAttribute: true
         },
 
         /**
