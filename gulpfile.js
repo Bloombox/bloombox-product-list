@@ -26,8 +26,7 @@ gulp.task('serve', ['default'], function () {
     }
   });
 
-  gulp.watch(['demo/*.html'], reload);
-  gulp.watch(['*.html'], ['quickbuild', reload]);
+  gulp.watch(['*.html', 'demo/*.html'], ['quickbuild', reload]);
 });
 
 gulp.task('default', function (cb) {
