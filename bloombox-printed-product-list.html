@@ -258,6 +258,10 @@ for printing on paper.
           if (value.pricelist !== undefined) {
             return value.pricelist.gram.price;
           }
+          if (value.pricing !== undefined) {
+            if (value.pricing.unit !== undefined)
+              return value.pricing.unit.value;
+          }
         }
         console.warn("Unable to determine base comparable price for subject product:", product);
         return 0;
