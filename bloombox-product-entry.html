@@ -60,10 +60,7 @@
       }
 
       :host paper-item .item-name {
-        margin-right: 30px;
-        position: relative;
-        top: 2px;
-        display: inline-block;
+        margin-right: 10px;
       }
 
       :host paper-item.all-pricing {
@@ -151,6 +148,19 @@
         display: flex;
       }
 
+      :host paper-item-body[two-line] .left-aligned-entry-data {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+      }
+
+      :host paper-item-body[two-line] .left-aligned-entry-data .item-name,
+      :host paper-item-body[two-line] .left-aligned-entry-data div[secondary] {
+        height: 18px;
+        line-height: 18px;
+      }
+
       :host paper-item-body .right-aligned-entry-data .pricing-box {
         display: inline-block;
         white-space: nowrap;
@@ -172,7 +182,7 @@
       <paper-item-body two-line$="[[_hasBrand]]">
         <div class="left-aligned-entry-data">
           <paper-checkbox hidden$="[[!multiselect]]" checked="{{selected}}"></paper-checkbox>
-          <b class="item-name entry-data">[[_renderProductName(product, partner)]]</b>
+          <b class="item-name entry-data">[[_renderProductName(product, partner, section)]]</b>
 
           <div secondary hidden$="[[!_hasBrand]]">
             <span class="product-entry-brand">[[product.brand]]</span>
@@ -234,7 +244,7 @@
         _stockClasses: {
           type: String,
           notify: true,
-          computed: '_computeStockClasses(product, _hasBrand, allPrices)'
+          computed: '_computeStockClasses(product, _hasBrand, allPrices, twoColumn)'
         },
 
         /**
@@ -326,6 +336,17 @@
         },
 
         /**
+         * Whether we should display products in two columns or
+         * just one.
+         */
+        twoColumn: {
+          type: Boolean,
+          notify: true,
+          value: false,
+          reflectToAttribute: true
+        },
+
+        /**
          * Activate or deactivate multiselection UI.
          */
         multiselect: {
@@ -351,7 +372,7 @@
        * Computes classes that should be applied to this
        * product entry.
        */
-      _computeStockClasses: function(product, hasBrand, allPrices) {
+      _computeStockClasses: function(product, hasBrand, allPrices, twoColumn) {
         var classes = ["product-item-entry-content"];
         if (product.flags !== undefined &&
             product.flags.visible === false) {
@@ -361,6 +382,8 @@
           classes.push("branded-product");
         if (allPrices === true)
           classes.push("all-pricing");
+        if (twoColumn === true)
+          classes.push("two-column");
         return classes.join(" ");
       },
 
