@@ -467,7 +467,7 @@
        * Render a product name as it should be shown, according to
        * the currently-active partner and product flags.
        */
-      _renderProductName: function(product, partner) {
+      _renderProductName: function(product, partner, section) {
         var name = product.name,
             flags = product.flags,
             grow = product.grow;
@@ -478,7 +478,7 @@
             name = "FS " + name;
           }
         }
-        if (partner === "abatin" && (flags !== undefined && flags !== null && flags.premium === true))
+        if (partner === "abatin" && (section === "flowers" || section === "concentrates") && (flags !== undefined && flags !== null && flags.premium === true))
           return "MPMH " + name;
         return name;
       },
