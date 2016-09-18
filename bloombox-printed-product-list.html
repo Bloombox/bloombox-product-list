@@ -156,7 +156,8 @@ for printing on paper.
           "eighth": "3.5g",
           "quarter": "7g",
           "half": "14g",
-          "ounce": "28g"
+          "ounce": "28g",
+          "unit": "Each"
         },
 
         productPriceTierOrder = [
@@ -377,6 +378,20 @@ for printing on paper.
                 });
               }
             }
+          } else if (product.pricing !== undefined) {
+            // unit pricing
+            if (product.pricing.unit !== undefined) {
+              tiers.push({
+                tier: "unit",
+                label: productPriceTierLabels["unit"],
+                available: product.pricing.unit.available,
+                value: product.pricing.unit.value
+              });
+            } else {
+              console.warn("Unable to determine price tiers for product.", product);
+            }
+          } else {
+            console.warn("Unable to determine price tiers for product.", product);
           }
           return tiers;
         }
