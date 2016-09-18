@@ -42,7 +42,6 @@ for printing on paper.
 
       :host h1 {
         position: relative;
-        top: 20px;
         padding: 0;
         -webkit-margin-before: 0;
         -webkit-margin-after: 0;
@@ -74,7 +73,7 @@ for printing on paper.
       :host div.printed-header-row {
         display: flex;
         justify-content: flex-end;
-        height: 20px;
+        height: 5px;
         border-bottom: 1px solid #111;
       }
 
@@ -98,6 +97,7 @@ for printing on paper.
         display: inline-block;
         text-align: center;
         font-weight: bold;
+        margin-top: -15px;
         margin-left: 3px;
       }
 
@@ -105,6 +105,12 @@ for printing on paper.
         top: 60px;
         left: 0;
         right: 0;
+      }
+
+      @media print {
+        bloombox-product-entry {
+          page-break-inside: avoid;
+        }
       }
     </style>
 

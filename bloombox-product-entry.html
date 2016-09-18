@@ -39,9 +39,12 @@
         pointer-events: none;
       }
 
+      :host,
       :host paper-item,
       :host paper-item paper-item-body {
         max-height: 50px;
+        break-inside: avoid;
+        page-break-inside: avoid;
       }
 
       :host iron-label {
