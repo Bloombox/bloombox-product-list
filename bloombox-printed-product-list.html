@@ -390,7 +390,7 @@ for printing on paper.
        * of rendering a header with column names.
        */
       _computeItemPriceTiers: function(products) {
-        var i, p, t, tiers = [], product;
+        var i, p, t, tiers = [], anyFound = false, product;
         if (Array.isArray(products) && products.length > 0) {
           product = products[0].value;
           if (product.pricelist !== undefined) {
@@ -416,10 +416,27 @@ for printing on paper.
                 value: product.pricing.unit.value
               });
             } else {
-              console.warn("Unable to determine price tiers for product.", product);
+              if (product.pricing.halfgram !== undefined) {
+                anyFound = true;
+                tiers.push({
+                  tier: "halfgram",
+                  label: productPriceTierLabels["halfgram"],
+                  available: product.pricing.halfgram.available,
+                  value: product.pricing.halfgram.value
+                });
+              }
+              if (product.pricing.gram !== undefined) {
+                anyFound = true;
+                tiers.push({
+                  tier: "gram",
+                  label: productPriceTierLabels["gram"],
+                  available: product.pricing.gram.available,
+                  value: product.pricing.gram.value
+                });
+              }
+              if (!anyFound)
+                console.warn("Unable to determine price tiers for product.", product);
             }
-          } else {
-            console.warn("Unable to determine price tiers for product.", product);
           }
           return tiers;
         }

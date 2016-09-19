@@ -417,7 +417,7 @@
        * object that is being rendered in `allPrices` mode.
        */
       _computeItemPriceTiers: function(product) {
-        var i, p, t, tiers = [];
+        var i, p, t, tiers = [], anyFound = false;
         if (product.pricelist !== undefined) {
           // flower pricing
           for (i in productPriceTierOrder) {
@@ -442,7 +442,26 @@
               value: product.pricing.unit.value
             });
           } else {
-            console.warn("Unable to determine price tiers for product.", product);
+            if (product.pricing.halfgram !== undefined) {
+              anyFound = true;
+              tiers.push({
+                tier: "halfgram",
+                label: productPriceTierLabels["halfgram"],
+                available: product.pricing.halfgram.available,
+                value: product.pricing.halfgram.value
+              });
+            }
+            if (product.pricing.gram !== undefined) {
+              anyFound = true;
+              tiers.push({
+                tier: "gram",
+                label: productPriceTierLabels["gram"],
+                available: product.pricing.gram.available,
+                value: product.pricing.gram.value
+              });
+            }
+            if (!anyFound)
+              console.warn("Unable to determine price tiers for product.", product);
           }
         } else {
           console.warn("Unable to determine price tiers for product.", product);
