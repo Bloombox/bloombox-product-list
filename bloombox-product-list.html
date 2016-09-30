@@ -37,6 +37,10 @@
         top: 64px;
         bottom: 37px;
         border-bottom: #a3a3a3;
+        border-right: 1px solid #ddd;
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        -webkit-box-sizing: border-box;
       }
 
       :host .product-list-container bloombox-product-entry {
@@ -47,24 +51,17 @@
         -moz-user-select: none;
         -ms-user-select: none;
         user-select: none;
+        background: white;
+        border-bottom: 1px solid #ddd;
       }
 
       :host .product-list-container bloombox-product-entry[selected] {
-        background-color: #fefefe !important;
+        background-color: #ddd !important;
         pointer-events: none;
       }
 
       :host .product-list-container.multiselect bloombox-product-entry[selected] {
         pointer-events: inherit;
-      }
-      
-      :host .product-list-container,
-      :host .product-list-container bloombox-product-entry:nth-child(odd) {
-        background: #cecece;
-      }
-
-      :host .product-list-container bloombox-product-entry:nth-child(even) {
-        background: #afafaf;
       }
 
       :host #statusLabel {
