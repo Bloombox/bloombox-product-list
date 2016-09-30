@@ -583,6 +583,32 @@
        */
       selectItem: function(item) {
         this.$.productsList.selectItem(item);
+      },
+
+      /**
+       * Fetch index for `key` in the local product dataset.
+       */
+      selectKeyIndex: function(key) {
+        var i;
+        for (i in this._visibleProducts) {
+          if (this._visibleProducts[i].key === key)
+            return new Number(i);
+        }
+      },
+
+      /**
+       * Select an item at `key` in the local product dataset.
+       */
+      selectKey: function(key) {
+        debugger;
+        return this.$.productsList.selectItem(this.selectKeyIndex(key));
+      },
+
+      /**
+       * Fetch an item by `key` in the local product dataset.
+       */
+      fetchByKey: function(key) {
+        return this.products[this.selectKeyIndex(key)];
       }
     });
   </script>
