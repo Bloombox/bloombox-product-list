@@ -592,7 +592,7 @@
         var i;
         for (i in this._visibleProducts) {
           if (this._visibleProducts[i].key === key)
-            return new Number(i);
+            return parseInt(i);
         }
       },
 
@@ -600,7 +600,6 @@
        * Select an item at `key` in the local product dataset.
        */
       selectKey: function(key) {
-        debugger;
         return this.$.productsList.selectItem(this.selectKeyIndex(key));
       },
 
