@@ -454,8 +454,9 @@
           if (saleOnly === true) {
             // sale filter is active
             if (product.value.flags == undefined ||
-               (product.value.flags.sale < 1 &&
-                product.value.flags.bogo !== true)) {
+               ((product.value.flags.sale < 1 ||
+                 !product.value.flags.sale) &&
+                 product.value.flags.bogo !== true)) {
               return false;  // rejected because it's not on sale, or BOGO
             }
           }
