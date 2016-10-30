@@ -375,9 +375,9 @@ for printing on paper.
             return -1;
           } else {
             // base prices are equal: disambiguate by `premium`
-            if (!that._isPremiumProduct(a) && that._isPremiumProduct(b)) {
+            if (!that._isPremiumProduct(a.value) && that._isPremiumProduct(b.value)) {
               return 1;
-            } else if (!that._isPremiumProduct(b) && that._isPremiumProduct(a)) {
+            } else if (!that._isPremiumProduct(b.value) && that._isPremiumProduct(a.value)) {
               return -1;
             } else {
               // base prices are equal and both are premium or not: disambiguate via tests
