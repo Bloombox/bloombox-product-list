@@ -411,28 +411,57 @@
       },
 
       /**
+       * Filter out invalid/bogus search terms, such as
+       * strings full of nothing but spaces.
+       */
+      _filterTerms: function(terms) {
+        var i, v, filtered = [];
+        for (i in terms) {
+          v = terms[i].replace(" ", "").trim();
+          if (v.length === 0 || !v)
+            continue;
+          filtered.push(v);
+        }
+        return filtered;
+      },
+
+      /**
        * Enforce search terms that the user has entered.
        */
       _enforceSearch: function(terms, product) {
-        var properties = ["name", "brand"],
+        var properties = ["name", "brand", "description"],
             prop_i,
-            v,
-            term_i;
+            v,  // value
+            term_i,
+            filteredTerms = this._filterTerms(terms),
+            checkTerms = function(value) {
+              var iv;
+              if (typeof value === "string") {
+                value = value.toLowerCase();
+                for (term_i in filteredTerms) {
+                  iv = terms[term_i].toLowerCase();
+                  if (value.indexOf(iv) != -1) {
+                    return true;  // found
+                  }
+                }
+                return false;  // not found
+              }
+            };
+
+        // special case: if the terms include "MPMH,"
+        // then make sure it matches for "Abatin" too
+        if (terms.indexOf("mpmh")) {
+          if (!terms.indexOf("abatin"))
+            terms.push("abatin");
+        }
+
+        // @TODO: make this work for other dispensaries too
 
         for (prop_i in properties) {
           // retrieve value for property
           v = product.value[properties[prop_i]];
-
-          if (typeof v === "string") {
-            v = v.toLowerCase();
-            for (term_i in terms) {
-              if (v.indexOf(terms[term_i]) == -1) {
-                // it failed: we can stop looking
-                return false;
-              }
-            }
-            return true;
-          }
+          if (checkTerms(v))
+            return true;  // there was a match
         }
         return false;  // no match :(
       },
