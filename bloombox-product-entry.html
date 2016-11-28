@@ -508,10 +508,10 @@
        */
       _renderRatingLabel: function(value) {
         var mode = this.product.tests !== undefined ? this.product.tests.mode : null;
+        if (value == 0 || value === undefined || value == null)
+          return "None";
         if (typeof mode === "string")
           return [value, mode].join("");
-        if (value === 0 || value === undefined || value == null)
-          return "None";
         if (value > 100 || Number(value) === value && value % 1 === 0)
           return [value, "mg"].join("");
         return [value, "%"].join("");
