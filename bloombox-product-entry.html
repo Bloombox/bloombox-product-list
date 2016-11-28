@@ -104,6 +104,28 @@
         margin-top: 7px;
       }
 
+      :host paper-item.all-pricing .product-testing-pending {
+        flex: 2 0 80px;
+        height: 50px;
+        line-height: 32px;
+        margin-top: 7px;
+      }
+
+      :host paper-item.all-pricing .product-testing-pending .rating-label {
+        display: none;
+      }
+
+      :host paper-item.all-pricing .product-testing-pending .pending-label {
+        display: inline-block;
+        opacity: 0.6;
+        margin-top: 5px;
+        font-style: italic;
+      }
+
+      :host paper-item.all-pricing .product-testing-content .pending-label {
+        display: none;
+      }
+
       :host paper-item.all-pricing .price-value-unavailable {
         opacity: 0.4;
         color: #888;
@@ -111,6 +133,25 @@
 
       :host paper-item .product-testing-content {
         flex: 2 0 20%;
+      }
+
+      :host paper-item .product-testing-pending {
+        flex: 2 0 20%;
+      }
+
+      :host paper-item .product-testing-pending .rating-label {
+        display: none;
+      }
+
+      :host paper-item .product-testing-pending .pending-label {
+        display: inline-block;
+        opacity: 0.6;
+        margin-top: 5px;
+        font-style: italic;
+      }
+
+      :host paper-item .product-testing-content .pending-label {
+        display: none;
       }
 
       :host paper-item.branded-product .product-testing-content {
@@ -190,9 +231,10 @@
         </div>
 
         <div class="right-aligned-entry-data" hidden$="[[multiselect]]">
-          <div class="product-entry-content product-testing-content">
+          <div class$="[[_testingClasslist]]">
             <iron-label class="rating-label thc-label"><span class="rating-label-name">THC</span>[[_renderRatingLabel(product.tests.thc)]]</iron-label>
             <iron-label class="rating-label cbd-label"><span class="rating-label-name">CBD</span>[[_renderRatingLabel(product.tests.cbd)]]</iron-label>
+            <iron-label class="pending-label">Pending</iron-label>
           </div><!-- end div.product-testing-content -->
           <div class="product-entry-content product-pricing-content">
             <div class="pricing-box">
@@ -266,6 +308,17 @@
           type: Array,
           notify: true,
           computed: '_computeItemPriceTiers(product)'
+        },
+
+        /**
+         * Computed property that provides a set of classes
+         * to apply to the testing block of a master row
+         * item in the product list.
+         */
+        _testingClasslist: {
+          type: String,
+          notify: true,
+          computed: '_computeItemTestingClasslist(product)'
         },
 
         /**
@@ -467,6 +520,17 @@
           console.warn("Unable to determine price tiers for product.", product);
         }
         return tiers;
+      },
+
+      /**
+       * Compute a set of classes to apply to the testing block
+       * of a master row item in the product list. Backs the
+       * property `_itemTestingClasslist`.
+       */
+      _computeItemTestingClasslist: function(product) {
+        if (product.tests && (product.tests.cbd > 0.0 || product.tests.thc > 0.0))
+          return "product-entry-content product-testing-content";
+        return "product-entry-content product-testing-pending";
       },
 
       /**
