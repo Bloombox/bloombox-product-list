@@ -26,21 +26,26 @@
         display: flex;
         cursor: pointer;
         flex-direction: column;
-        width: var(--bloombox-product-list-width, 420px);
+        overflow: hidden;
       }
 
       :host .product-list-container {
         display: block;
-        width: 100%;
         overflow: auto;
         position: absolute;
-        top: 64px;
+        top: 56px;
         bottom: 37px;
+        left: 0px;
+        right: 0px;
         border-bottom: #a3a3a3;
         border-right: 1px solid #ddd;
         box-sizing: border-box;
         -moz-box-sizing: border-box;
         -webkit-box-sizing: border-box;
+      }
+
+      :host bloombox-product-list-tools {
+        margin-left: -1px;
       }
 
       :host .product-list-container bloombox-product-entry {
@@ -72,6 +77,10 @@
         color: white;
         text-transform: uppercase;
         padding-left: 10px;
+        position: absolute;
+        bottom: 0px;
+        left: -1px;
+        right: 0;
       }
     </style>
 
@@ -390,10 +399,10 @@
        * Computes classes that should be applied to the list container
        * div.
        */
-      _computeContainerClasses: function(multiselect) {
+      _computeContainerClasses: function(multiselect, section) {
         if (multiselect === true)
-          return "product-list-container multiselect";
-        return "product-list-container";
+          return "product-list-container multiselect product-list-" + section;
+        return "product-list-container product-list-" + section;
       },
 
       /**

@@ -26,7 +26,7 @@
   <template strip-whitespace>
     <style is="custom-style" include="bloombox-styles">
       :host {
-        height: 50px;
+        height: var(--bloombox-product-entry-height, 50px);
         background: white;
       }
 
@@ -35,14 +35,14 @@
       }
 
       :host paper-item {
-        height: 50px;
+        height: var(--bloombox-product-entry-height, 50px);
         pointer-events: none;
       }
 
       :host,
       :host paper-item,
       :host paper-item paper-item-body {
-        max-height: 50px;
+        max-height: var(--bloombox-product-entry-height, 50px);
         break-inside: avoid;
         page-break-inside: avoid;
       }
@@ -69,8 +69,8 @@
 
       :host paper-item.all-pricing .item-name {
         display: inline-block;
-        height: 50px;
-        line-height: 50px;
+        height: var(--bloombox-product-entry-height, 50px);
+        line-height: var(--bloombox-product-entry-height, 50px);
         top: 0;
       }
 
@@ -79,7 +79,7 @@
       }
 
       :host paper-item .left-aligned-entry-data {
-        flex: 1 0 210px;
+        flex: 1 0 270px;
       }
 
       :host paper-item .right-aligned-entry-data {
@@ -99,14 +99,14 @@
 
       :host paper-item.all-pricing .product-testing-content {
         flex: 2 0 80px;
-        height: 50px;
+        height: var(--bloombox-product-entry-height, 50px);
         line-height: 16px;
         margin-top: 7px;
       }
 
       :host paper-item.all-pricing .product-testing-pending {
         flex: 2 0 80px;
-        height: 50px;
+        height: var(--bloombox-product-entry-height, 50px);
         line-height: 32px;
         margin-top: 7px;
       }
@@ -154,8 +154,12 @@
         display: none;
       }
 
+      :host paper-item.branded-product .product-testing-pending {
+        margin-top: 5px;
+      }
+
       :host paper-item.branded-product .product-testing-content {
-        margin-top: 10px;
+        margin-top: 5px;
       }
 
       :host paper-item .product-testing-content iron-label .rating-label-name {
@@ -194,12 +198,35 @@
         flex-direction: column;
         align-items: flex-start;
         justify-content: center;
+        max-width: var(--bloombox-product-entry-main-column-width, 210px);
       }
 
       :host paper-item-body[two-line] .left-aligned-entry-data .item-name,
       :host paper-item-body[two-line] .left-aligned-entry-data div[secondary] {
         height: 18px;
         line-height: 18px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: var(--bloombox-product-entry-main-column-width, 205px);
+      }
+
+      :host paper-item.product-item-entry-flowers paper-item-body .left-aligned-entry-data {
+        max-width: var(--bloombox-product-entry-main-column-width, 210px);
+      }
+
+      :host paper-item.product-item-entry-edibles paper-item-body .left-aligned-entry-data {
+        max-width: var(--bloombox-product-entry-main-column-width, 235px);
+      }
+
+      :host paper-item.product-item-entry-edibles paper-item-body[two-line] .left-aligned-entry-data .item-name,
+      :host paper-item.product-item-entry-edibles paper-item-body[two-line] .left-aligned-entry-data div[secondary] {
+        height: 18px;
+        line-height: 18px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: var(--bloombox-product-entry-main-column-width, 220px);
       }
 
       :host paper-item-body .right-aligned-entry-data .pricing-box {
@@ -212,8 +239,8 @@
         max-width: 100px;
         min-width: 80px;
         display: inline-block;
-        height: 50px;
-        line-height: 50px;
+        height: var(--bloombox-product-entry-height, 50px);
+        line-height: var(--bloombox-product-entry-height, 50px);
       }
     </style>
 
@@ -232,8 +259,8 @@
 
         <div class="right-aligned-entry-data" hidden$="[[multiselect]]">
           <div class$="[[_testingClasslist]]">
-            <iron-label class="rating-label thc-label"><span class="rating-label-name">THC</span>[[_renderRatingLabel(product.tests.thc)]]</iron-label>
-            <iron-label class="rating-label cbd-label"><span class="rating-label-name">CBD</span>[[_renderRatingLabel(product.tests.cbd)]]</iron-label>
+            <iron-label class="rating-label thc-label"><span class="rating-label-name">THC</span>[[_renderRatingLabel(product.tests.thc, section)]]</iron-label>
+            <iron-label class="rating-label cbd-label"><span class="rating-label-name">CBD</span>[[_renderRatingLabel(product.tests.cbd, section)]]</iron-label>
             <iron-label class="pending-label">Pending</iron-label>
           </div><!-- end div.product-testing-content -->
           <div class="product-entry-content product-pricing-content">
@@ -286,7 +313,7 @@
         _stockClasses: {
           type: String,
           notify: true,
-          computed: '_computeStockClasses(product, _hasBrand, allPrices, twoColumn)'
+          computed: '_computeStockClasses(product, _hasBrand, allPrices, twoColumn, section)'
         },
 
         /**
@@ -425,8 +452,9 @@
        * Computes classes that should be applied to this
        * product entry.
        */
-      _computeStockClasses: function(product, hasBrand, allPrices, twoColumn) {
-        var classes = ["product-item-entry-content"];
+      _computeStockClasses: function(product, hasBrand, allPrices, twoColumn, section) {
+        var classes = ["product-item-entry-content",
+                       "product-item-entry-" + section];
         if (product.flags !== undefined &&
             product.flags.visible === false) {
           classes.push("product-entry-out-of-stock");
@@ -570,13 +598,13 @@
        * Renders a rating test value into a readable piece
        * of text for the UI.
        */
-      _renderRatingLabel: function(value) {
+      _renderRatingLabel: function(value, section) {
         var mode = this.product.tests !== undefined ? this.product.tests.mode : null;
         if (value == 0 || value === undefined || value == null)
           return "None";
         if (typeof mode === "string")
           return [value, mode].join("");
-        if (value > 100 || Number(value) === value && value % 1 === 0)
+        if ((value > 100 || Number(value) === value && value % 1 === 0 || section == "edibles") && (section != "concentrates"))
           return [value, "mg"].join("");
         return [value, "%"].join("");
       },
