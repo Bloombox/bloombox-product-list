@@ -1,13 +1,14 @@
 {
   "name": "bloombox-product-list",
+  "version": "0.0.1",
   "description": "Provides common structure and code for product cards and UI",
   "main": "bloombox-product.html",
   "dependencies": {
-    "polymer": "Polymer/polymer#^1.6.0",
+    "polymer": "Polymer/polymer#^1.7.0",
     "iron-list": "PolymerElements/iron-list#^1.3.5",
     "paper-item": "PolymerElements/paper-item#^1.2.1",
-    "bloombox-styles": "git@github.com:bloombox/bloombox-styles.git#master",
-    "bloombox-icons": "git@github.com:bloombox/bloombox-icons.git#master",
+    "bloombox-styles": "Bloombox/bloombox-styles",
+    "bloombox-icons": "Bloombox/bloombox-icons",
     "paper-toolbar": "PolymerElements/paper-toolbar#^1.1.6",
     "paper-checkbox": "PolymerElements/paper-checkbox#^1.3.0",
     "paper-input": "PolymerElements/paper-input#^1.1.17",
@@ -20,7 +21,6 @@
   "devDependencies": {
     "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",
     "iron-demo-helpers": "PolymerElements/iron-demo-helpers#^1.0.0",
-    "web-component-tester": "^4.0.0",
     "webcomponentsjs": "webcomponents/webcomponentsjs#^0.7.0"
   }
 }
