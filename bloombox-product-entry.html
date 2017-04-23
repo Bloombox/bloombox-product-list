@@ -193,12 +193,17 @@
         display: flex;
       }
 
-      :host paper-item-body[two-line] .left-aligned-entry-data {
+      :host paper-item-body .left-aligned-entry-data {
         display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        justify-content: center;
-        max-width: var(--bloombox-product-entry-main-column-width, 210px);
+        align-items: center;
+        overflow: hidden;
+        max-width: var(--bloombox-product-entry-main-column-width, 220px);
+        overflow: hidden;
+      }
+
+      :host paper-item-body .left-aligned-entry-data .left-aligned-name-block {
+        max-width: var(--bloombox-product-entry-main-column-width, 220px);
+        overflow: hidden;
       }
 
       :host paper-item-body[two-line] .left-aligned-entry-data .item-name,
@@ -208,15 +213,15 @@
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        max-width: var(--bloombox-product-entry-main-column-width, 205px);
+        display: block;
       }
 
       :host paper-item.product-item-entry-flowers paper-item-body .left-aligned-entry-data {
-        max-width: var(--bloombox-product-entry-main-column-width, 210px);
+        max-width: var(--bloombox-product-entry-main-column-width, 220px);
       }
 
       :host paper-item.product-item-entry-edibles paper-item-body .left-aligned-entry-data {
-        max-width: var(--bloombox-product-entry-main-column-width, 235px);
+        max-width: var(--bloombox-product-entry-main-column-width, 220px);
       }
 
       :host paper-item.product-item-entry-edibles paper-item-body[two-line] .left-aligned-entry-data .item-name,
@@ -226,6 +231,7 @@
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+        display: block;
         max-width: var(--bloombox-product-entry-main-column-width, 220px);
       }
 
@@ -250,10 +256,11 @@
       <paper-item-body two-line$="[[_hasBrand]]">
         <div class="left-aligned-entry-data">
           <paper-checkbox hidden$="[[!multiselect]]" checked="{{selected}}"></paper-checkbox>
-          <b class="item-name entry-data">[[_renderProductName(product, partner, section)]]</b>
-
-          <div secondary hidden$="[[!_hasBrand]]">
-            <span class="product-entry-brand">[[product.brand]]</span>
+          <div class="left-aligned-name-block">
+            <b class="item-name entry-data">[[_renderProductName(product, partner, section)]]</b>
+            <div secondary hidden$="[[!_hasBrand]]">
+              <span class="product-entry-brand">[[product.brand]]</span>
+            </div>
           </div>
         </div>
 
