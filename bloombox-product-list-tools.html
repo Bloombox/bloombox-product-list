@@ -70,12 +70,21 @@ and easily navigating a `<bloombox-product-list>`.
       input::-webkit-input-placeholder {
         color: white;
       }
+
+      .search-clear-button {
+        height: 30px;
+        width: 30px;
+        line-height: 10px !important;
+      }
     </style>
 
     <div class="product-list-toolbar-container">
       <paper-toolbar id="productListToolbar">
-        <paper-icon-button toggles active="{{multiselect}}" icon="list"></paper-icon-button>
-        <paper-input id="searchInput" disabled$="[[multiselect]]" label="Search" value="{{search}}" no-label-float></paper-input>
+        <paper-icon-button toggles active="{{multiselect}}" icon="list" id="searchInput"></paper-icon-button>
+        <paper-input id="searchInput" disabled$="[[multiselect]]" label="Search" value="{{search}}" no-label-float>
+          <paper-icon-button suffix on-tap="clearSearch" icon="clear" alt="clear" title="clear" class="search-clear-button" disabled$="[[multiselect]]">
+          </paper-icon-button>
+        </paper-input>
       </paper-toolbar>
     </div><!-- end .product-list-toolbar-container -->
   </template>
@@ -122,6 +131,33 @@ and easily navigating a `<bloombox-product-list>`.
           type: String,
           notify: true
         }
+      },
+
+      /**
+       * Dispatched when a user is searching and pressed the `esc` key,
+       * which triggers `clearSearch` and dispatches the `user-search-clear`
+       * event.
+       */
+      _onEscPressed: function() {
+        if (this.search) this.clearSearch();
+        else this._searchInput.$.input.blur();
+      },
+
+      /**
+       * Dispatched when a user is searching and pressed the `enter` key,
+       * which dispatches the `user-search-enter` event.
+       */
+      _onEnterPressed: function() {
+        this.fire("user-search-enter", {"target": this, "search": this.search});
+      },
+
+      /**
+       * Clear any current search terms and reset the displayed
+       * products.
+       */
+      clearSearch: function() {
+        this.set("search", null);
+        this.fire("user-search-clear", {"target": this});
       }
     });
   </script>
