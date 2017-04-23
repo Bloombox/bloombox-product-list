@@ -13,6 +13,7 @@ and easily navigating a `<bloombox-product-list>`.
 
 <link rel="import" href="../iron-icons/iron-icons.html">
 <link rel="import" href="../iron-iconset/iron-iconset.html">
+<link rel="import" href="../iron-a11y-keys/iron-a11y-keys.html">
 
 <link rel="import" href="../paper-input/paper-input.html">
 <link rel="import" href="../paper-toolbar/paper-toolbar.html">
@@ -78,6 +79,9 @@ and easily navigating a `<bloombox-product-list>`.
       }
     </style>
 
+    <iron-a11y-keys keys="esc" target="[[_searchInput]]" on-keys-pressed="_onEscPressed"></iron-a11y-keys>
+    <iron-a11y-keys keys="enter" target="[[_searchInput]]" on-keys-pressed="_onEnterPressed"></iron-a11y-keys>
+
     <div class="product-list-toolbar-container">
       <paper-toolbar id="productListToolbar">
         <paper-icon-button toggles active="{{multiselect}}" icon="list" id="searchInput"></paper-icon-button>
@@ -93,7 +97,32 @@ and easily navigating a `<bloombox-product-list>`.
     Polymer.BloomboxProductListTools = Polymer({
       is: 'bloombox-product-list-tools',
 
+      /**
+       * Fired when a user hits `enter` during a search.
+       *
+       * @event user-search-submit
+       * @param {!PolymerElement} target Instance of this element.
+       * @param {?string} search Value of the search box at the time.
+       */
+
+      /**
+       * Fired when a user clears search terms and resets the UI.
+       *
+       * @event user-search-clear
+       * @param {!PolymerElement} target Instance of this element.
+       */
+
       properties: {
+        /**
+         * Access to search input box.
+         */
+        _searchInput: {
+          type: Object,
+          value: function() {
+            return this.$.searchInput;
+          }
+        },
+
         /**
          * Current section that we are displaying tools for.
          */
