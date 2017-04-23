@@ -1,6 +1,6 @@
 {
   "name": "bloombox-product-list",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Provides UI for listing products and performing individual or mass edits/deletes",
   "main": "index.html",
   "repository": {
