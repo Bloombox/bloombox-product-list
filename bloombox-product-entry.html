@@ -197,7 +197,7 @@
         display: flex;
         align-items: center;
         overflow: hidden;
-        max-width: var(--bloombox-product-entry-main-column-width, 220px);
+        max-width: var(--bloombox-product-entry-main-column-width, 200px);
         overflow: hidden;
       }
 
@@ -628,23 +628,27 @@
         if (value.pricelist !== undefined) {
           return value.pricelist.gram.price;
         } else if (value.pricing !== undefined) {
-          if (value.pricing.unit !== undefined) {
+          if (value.pricing.unit !== undefined && value.category !== "Flower") {
             return value.pricing.unit.value;
           } else {
             if (value.pricing.gram !== undefined &&
-                value.pricing.gram.value > 0) {
-              return value.pricing.gram.value;
+                parseFloat(value.pricing.gram.value) > 0) {
+              return parseFloat(value.pricing.gram.value);
             } else if (value.pricing.quartergram !== undefined &&
-                       value.pricing.quartergram > 0) {
-              return value.pricing.quartergram.value;
-            } else if (value.pricing.halfgram !== undefined) {
-              return value.pricing.halfgram.value;
+                       parseFloat(value.pricing.quartergram.value) > 0) {
+              return parseFloat(value.pricing.quartergram.value);
+            }  else if (value.pricing.eighth !== undefined &&
+                       parseFloat(value.pricing.eighth.value) > 0) {
+              return parseFloat(value.pricing.eighth.value);
+            } else if (value.pricing.halfgram !== undefined &&
+                       parseFloat(value.pricing.halfgram.value) > 0) {
+              return parseFloat(value.pricing.halfgram.value);
             } else {
               console.warn("Unable to render pricing for value.", value);
             }
           }
         }
-        return "error";
+        return "";
       },
 
       /**
@@ -660,19 +664,23 @@
         if (value.pricelist !== undefined) {
           return "/g";
         } else if (value.pricing !== undefined) {
-          if (value.pricing.unit !== undefined) {
+          if (value.pricing.unit !== undefined && value.category !== "Flower") {
             return "";
           } else {
             if (value.pricing.gram !== undefined &&
-                value.pricing.gram.value > 0) {
+                parseFloat(value.pricing.gram.value) > 0) {
               return "/g";
             } else if (value.pricing.quartergram !== undefined &&
-                       value.pricing.quartergram > 0) {
-              return "/.25g";
-            } else if (value.pricing.halfgram !== undefined) {
-              return "/.5g";
+                       parseFloat(value.pricing.quartergram.value) > 0) {
+              return "/0.25g";
+            }  else if (value.pricing.eighth !== undefined &&
+                       parseFloat(value.pricing.eighth.value) > 0) {
+              return "/8th";
+            } else if (value.pricing.halfgram !== undefined &&
+                       parseFloat(value.pricing.halfgram.value) > 0) {
+              return "/0.5g";
             } else {
-              console.warn("Unable to render pricing base for value.", value);
+              console.warn("Unable to render pricing base unit for value.", value);
             }
           }
         }
