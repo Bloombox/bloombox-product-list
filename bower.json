@@ -1,6 +1,6 @@
 {
   "name": "bloombox-product-list",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Provides common structure and code for product cards and UI",
   "main": "bloombox-product.html",
   "dependencies": {
