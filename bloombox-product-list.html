@@ -152,7 +152,7 @@
         _visibleProducts: {
           type: Array,
           notify: true,
-          computed: '_computeVisibleProducts(_productsArray, search, instockOnly, saleOnly, hasTestsOnly)'
+          computed: '_computeVisibleProducts(_productsArray, search, instockOnly, saleOnly, hasTestsOnly, isfeaturedOnly)'
         },
 
         /**
@@ -290,6 +290,12 @@
           value: true
         },
 
+        isfeaturedOnly: {
+          type: Boolean,
+          notify: true,
+          value: true
+        },
+
         /**
          * Specifies a filter option whereby only items with a nonzero
          * value for `sale` show in the list of products.
@@ -313,7 +319,7 @@
       },
 
       observers: [
-        '_selectedItemsDidChange(multiselect, selectedItems.*, _productsArray, instockOnly, saleOnly, hasTestsOnly)'
+        '_selectedItemsDidChange(multiselect, selectedItems.*, _productsArray, instockOnly, saleOnly, hasTestsOnly, isfeaturedOnly)'
       ],
 
       /**
@@ -335,7 +341,7 @@
        * Computes which products should be visible, given the current
        * state of search and filters.
        */
-      _computeVisibleProducts: function(products, search, instockOnly, saleOnly, hasTestsOnly) {
+      _computeVisibleProducts: function(products, search, instockOnly, saleOnly, hasTestsOnly, isfeaturedOnly) {
         var filteredProducts = [], terms, product;
         if (Array.isArray(products) && products.length > 0) {
           if (search) {
@@ -344,7 +350,7 @@
               for (i in products) {
                 product = products[i];
                 // enforce search terms
-                if (this._enforceFilters(instockOnly, saleOnly, hasTestsOnly, product) &&
+                if (this._enforceFilters(instockOnly, saleOnly, hasTestsOnly, isfeaturedOnly, product) &&
                     this._enforceSearch(terms, product)) {
                   filteredProducts.push(products[i]);
                 }
@@ -356,7 +362,7 @@
             // just enforce filters
             for (i in products) {
               product = products[i];
-              if (this._enforceFilters(instockOnly, saleOnly, hasTestsOnly, product)) {
+              if (this._enforceFilters(instockOnly, saleOnly, hasTestsOnly, isfeaturedOnly, product)) {
                 filteredProducts.push(products[i]);
               }
             }
@@ -479,7 +485,7 @@
        * Enforce filter state that the user has selected via
        * `<bloombox-menutools>`.
        */
-      _enforceFilters: function(instockOnly, saleOnly, hasTestsOnly, product) {
+      _enforceFilters: function(instockOnly, saleOnly, hasTestsOnly, isfeaturedOnly, product) {
         if (product) {
 
           if (instockOnly === true) {
@@ -496,6 +502,15 @@
                  !product.value.flags.sale) &&
                  product.value.flags.bogo !== true)) {
               return false;  // rejected because it's not on sale, or BOGO
+            }
+          }
+          if (isfeaturedOnly === true && product.value.flags !== undefined) {
+            console.log(product.value)
+            // isfeatured filter is active
+            if (product.value.flags !== undefined &&
+                product.value.flags.hasOwnProperty('featured') === false ||
+                product.value.flags.featured === false) {
+              return false;  // rejected because it's not featured
             }
           }
           if (hasTestsOnly !== "all") {
